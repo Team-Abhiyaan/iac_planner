@@ -2,10 +2,12 @@ from typing import Generator, List
 
 import numpy as np
 
-from iac_planner.helpers import path_t
+from iac_planner.helpers import path_t, PathGenerationParams
+from iac_planner.path_sampling.spline import SplineGenerator
+from iac_planner.path_sampling.types import Pose
 
 
-def generate_paths(env, n=10, n_pts=20) -> Generator[path_t, None, None]:
+def generate_paths(env) -> Generator[path_t, None, None]:
     """
     Generates straight lines around the direction the vehicle faces
     TODO: Replace with an actual path generator
@@ -15,10 +17,23 @@ def generate_paths(env, n=10, n_pts=20) -> Generator[path_t, None, None]:
     :param n_pts: Number of points in each path
     :return:
     """
-    r = np.linspace(0, 5, n_pts)
-    veh = env.state
-    for i in range(n):
-        a = np.arctan(-0.8 + (0.8 - (-0.8)) * (1.0 * i / n))
-        x = veh[0] + r * np.cos(a + veh[2])
-        y = veh[1] + r * np.sin(a + veh[2])
-        yield np.stack([x, y], axis=1)
+    s = env.state
+    p = Pose()
+    p.x = s[0]
+    p.y = s[1]
+    p.yaw = s[2]
+    p_obs: Pose = None
+    if len(env.other_vehicle_states) != 0:
+        state = env.other_vehicle_states[0]
+        p_obs.x = state[0]
+        p_obs.y = state[1]
+        p_obs.yaw = state[2]
+
+    gen = SplineGenerator(env.global_path_handler, p, p_obs, env.left_poly, env.right_poly)
+    params: PathGenerationParams = env.path_generation_params
+    for path in gen.generate_long(params.n_long, params.n_pts_long):
+        yield np.stack(path, axis=1)
+
+    if p_obs is not None and env.left_poly is not None and env.right_poly is not None:
+        for path in gen.generate_lat(params.n_long, params.n_pts_long):
+            yield np.stack(path, axis=1)

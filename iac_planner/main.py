@@ -22,7 +22,9 @@ import rticonnextdds_connector as rti
 
 def main(args: Optional[Iterable[str]] = None):
     env: Env = Env()
-
+    env.global_path_handler.load_from_csv('./resources/velocityProfileMu85.csv')
+    np_path = env.global_path_handler.global_path.to_numpy()[:, :2]
+    env.path = np.vstack([np_path] * 6)
     logging.basicConfig(level=logging.NOTSET)
     info: Callable[[str], None] = logging.getLogger(__name__).info
     env.info = info
@@ -140,9 +142,9 @@ def run(env: Env):
     #     visualize(env.m_pub, env.nh.get_clock(), 52 + 1 + i, [state[:2]], scale=0.5,
     #               color=ColorRGBA(r=1.0, g=1.0, a=1.0))
 
-    paths = generate_paths(env, n=10, n_pts=20)
+    paths = generate_paths(env)
 
-    best_trajectory, cost = score_paths(env, paths, max_path_len=20)
+    best_trajectory, cost = score_paths(env, paths, max_path_len=env.path_generation_params.n_pts_long)
 
     if best_trajectory is not None:
         info(f"Lowest {cost=:.2f}: {best_trajectory[1][:4]}")

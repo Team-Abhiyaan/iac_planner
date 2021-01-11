@@ -18,15 +18,12 @@ def generate_paths(env) -> Generator[path_t, None, None]:
     :return:
     """
     s = env.state
-    p = Pose()
-    p.x = s[0]
-    p.y = s[1]
+    p = Pose(s[0], s[1])
     p.yaw = s[2]
     p_obs: Pose = None
     if len(env.other_vehicle_states) != 0:
         state = env.other_vehicle_states[0]
-        p_obs.x = state[0]
-        p_obs.y = state[1]
+        p_obs = Pose(state[0], state[1])
         p_obs.yaw = state[2]
 
     gen = SplineGenerator(env.global_path_handler, p, p_obs, env.left_poly, env.right_poly)

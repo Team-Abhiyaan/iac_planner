@@ -9,8 +9,10 @@ from iac_planner.generate_markers import visualize
 from iac_planner.helpers import Env, path_t, state_t
 from iac_planner.generate_velocity_profile import generate_velocity_profile
 
-
 # TODO: Fix docstrings
+from iac_planner.path_sampling._core import intersection_line_cubic, polyeval
+from iac_planner.path_sampling.types import Line_SI
+
 
 class CollisionChecker:
     def __init__(self, env: Env, path_length: int, time_step: float):
@@ -23,7 +25,6 @@ class CollisionChecker:
         self._growth_factor_b = params.growth_factor_b
         self.other_vech_current_vel = 0
         self.other_vech_prev_vel = 0
-        self._obstacles = env.obstacles
         self._time_step = time_step
         self._path_length = path_length
         global other_vehicle_states
@@ -49,6 +50,34 @@ class CollisionChecker:
         # Takes in a set of obstacle borders and path waypoints and returns
         # a boolean collision check array that tells if a path has an obstacle
         # or not
+
+        # Find line perpendicular to the ego vehicles current heading
+        # Find line with same slope but 5 meters ahead
+        self.obstacles = []
+        l1 = Line_SI(math.tan(self._env.state[2]),
+                     self._env.state[1] - math.tan(self._env.state[2]) * self._env.state[0])
+        l2 = Line_SI(math.tan(self._env.state[2]),
+                     self._env.state[1] - math.tan(self._env.state[2]) * self._env.state[0] + math.sqrt(
+                         1 + math.tan(self._env.state[2]) ** 2) * 5)  # 5m is lookahead distance
+
+        # Find x co-ordinate of intersection of these lines
+        ll_x1 = intersection_line_cubic(l1, env.left_poly)[0]
+        ll_x2 = intersection_line_cubic(l2, env.left_poly)[0]
+        lr_x1 = intersection_line_cubic(l1, env.right_poly)[0]
+        lr_x2 = intersection_line_cubic(l2, env.right_poly)[0]
+
+        # Generate points on the lane boundries
+        x_l = np.linspace(ll_x1, ll_x2, 20)
+        x_r = np.linspace(lr_x1, lr_x2, 20)
+
+        cl = [env.left_poly.c3, env.left_poly.c2, env.left_poly.c1, env.left_poly.c0][::-1]
+        cr = [env.right_poly.c3, env.right_poly.c2, env.right_poly.c1, env.right_poly.c0][::-1]
+
+        y_l = np.array([polyeval(c, cl) for c in cl])
+        y_r = np.array([polyeval(c, cr) for c in cr])
+
+        self.obstacles = list(zip(x_l, y_l)) + list(zip(x_r, y_r))
+        self._obstacles = self.obstacles
 
     # generate time steps for single path
     def generate_time_step(self, path, velocity_profile):
@@ -108,8 +137,8 @@ class CollisionChecker:
                 ith index in the collision_check_array list corresponds to the
                 ith path in the paths list.
         """
-        if len(self._obstacles) == 0:
-            return True
+        if self._env.left_poly is None or self._env.right_poly is None:
+            assert (False, "No poly lol")
 
         if len(path) == 0:
             assert (False, "Empty Path")
@@ -213,7 +242,7 @@ class CollisionChecker:
                                               (2 + growth_factor * np.sum(time_step[:j])))
 
                 if np.any(collision_dists < 0):
-                    return False 
+                    return False
 
         self.other_vech_prev_vel = self.other_vech_current_vel
         return True

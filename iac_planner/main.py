@@ -16,6 +16,7 @@ from iac_planner.helpers import Env, state_t
 from iac_planner.path_sampling.types import RoadLinePolynom
 from iac_planner.score_paths import score_paths
 
+# TODO: update this
 GLOBAL_PATH_CSV_FILE = "./resources/velocityProfileMu85.csv"
 
 logging.basicConfig(level=logging.NOTSET)
@@ -51,9 +52,11 @@ def main(args: Optional[Iterable[str]] = None):
             sim_done.write()
 
             while True:
-                for reader in inputs.list():
-                    reader.wait()
-                    reader.take()
+                # for reader in inputs.list():
+                #     reader.wait()
+                #     reader.take()
+                inputs.list()[1].wait()
+                inputs.list()[1].take()
 
                 # read values to env
                 state_in = inputs.vehicle_state.samples[-1]

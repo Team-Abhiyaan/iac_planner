@@ -34,12 +34,12 @@ class GlobalPathHandler(object):
             None
 
         """
+        _logger.debug(f'Loading global path from - {file}')
         self._gp_df = pd.read_csv(file)
         self._loaded = True
         self._n = self._gp_df.shape[0]
         self._calculate_slopes()
-
-        _logger.debug(f'Loaded global path from: {file}')
+        _logger.debug('Preprocessing global data - SUCCESS')        
 
     @property
     def global_path(self) -> pd.core.frame.DataFrame:

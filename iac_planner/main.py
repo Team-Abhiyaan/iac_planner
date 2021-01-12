@@ -3,15 +3,12 @@
 Visualizes the CTE of some simple paths using rviz2
 """
 import sys
-from math import sqrt
 from typing import Optional, Iterable, Callable
 import logging
 
 import numpy as np
-# from std_msgs.msg import ColorRGBA
-
-# from iac_planner.generate_markers import visualize
 from rticonnextdds_connector import Input
+import rticonnextdds_connector as rti
 
 from iac_planner.generate_paths import generate_paths
 from iac_planner.generate_velocity_profile import generate_velocity_profile
@@ -19,22 +16,20 @@ from iac_planner.helpers import Env, state_t
 from iac_planner.path_sampling.types import RoadLinePolynom
 from iac_planner.score_paths import score_paths
 
-import rticonnextdds_connector as rti
+GLOBAL_PATH_CSV_FILE = "./resources/velocityProfileMu85.csv"
 
+logging.basicConfig(level=logging.NOTSET)
+_logger = logging.getLogger(__name__)
 
 def main(args: Optional[Iterable[str]] = None):
     env: Env = Env()
-    env.global_path_handler.load_from_csv('./resources/velocityProfileMu85.csv')
+    env.global_path_handler.load_from_csv(GLOBAL_PATH_CSV_FILE)
+
     np_path = env.global_path_handler.global_path.to_numpy()[:, :2]
     env.path = np.vstack([np_path] * 6 + [np_path[:20, :]])
-    logging.basicConfig(level=logging.NOTSET)
-    info: Callable[[str], None] = logging.getLogger(__name__).info
+    info: Callable[[str], None] = _logger.info
     env.info = info
     info("Starting up...")
-
-    # visualize(env.m_pub, env.nh.get_clock(), 52, env.obstacles, color=ColorRGBA(g=1.0, a=1.0))
-
-    # TODO: Load the global path
 
     try:
         with rti.open_connector(config_name="SCADE_DS_Controller::Controller",
@@ -65,7 +60,7 @@ def main(args: Optional[Iterable[str]] = None):
                 env.state[0] = state_in["cdgPos_x"]
                 env.state[1] = state_in["cdgPos_y"]
                 env.state[1] = state_in["cdgSpeed_heading"]
-                env.state[2] = sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
+                env.state[2] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
 
                 trajectory = None
                 try:

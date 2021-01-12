@@ -18,8 +18,7 @@ def generate_paths(env) -> Generator[path_t, None, None]:
     :return:
     """
     s = env.state
-    p = Pose(s[0], s[1])
-    p.yaw = s[2]
+    p = Pose(s[0], s[1], yaw=s[2])
     p_obs: Pose = None
     if len(env.other_vehicle_states) != 0:
         state = env.other_vehicle_states[0]

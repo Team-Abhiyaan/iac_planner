@@ -1,3 +1,9 @@
+### Install python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
 ```bash
 colcon build --symlink-install --packages-up-to iac_planner
 ros2 launch iac_planner main.launch.py

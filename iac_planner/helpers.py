@@ -64,6 +64,7 @@ class Env:
     info: Callable[[str], None] = None
 
     state: state_t = np.zeros(4)  # [x, y, theta, v]
+    gear = None # IDK datatype
     path: path_t = None  # [ [x, y], ... ]
 
     obstacles: np.ndarray = np.zeros((0, 2))

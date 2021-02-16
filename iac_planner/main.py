@@ -64,6 +64,7 @@ def main(args: Optional[Iterable[str]] = None):
                 env.state[1] = state_in["cdgPos_y"]
                 env.state[1] = state_in["cdgSpeed_heading"]
                 env.state[2] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
+                env.gear = state_in["GearEngaged"]
 
                 trajectory = None
                 try:

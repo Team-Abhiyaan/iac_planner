@@ -2,11 +2,11 @@ from time import sleep
 from typing import Union, Optional, List, Iterable
 
 import numpy as np
-from geometry_msgs.msg import Vector3, Point
-from rclpy.clock import Clock
-from rclpy.publisher import Publisher
-from std_msgs.msg import ColorRGBA, Header
-from visualization_msgs.msg import Marker
+#from geometry_msgs.msg import Vector3, Point
+#from rclpy.clock import Clock
+#from rclpy.publisher import Publisher
+#from std_msgs.msg import ColorRGBA, Header
+#from visualization_msgs.msg import Marker
 
 
 def visualize(*args) -> None:

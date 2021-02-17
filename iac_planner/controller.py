@@ -1,4 +1,4 @@
-from __future__ import print_function
+# from __future__ import print_function
 import rticonnextdds_connector as rti
 import csv
 import numpy as np
@@ -60,7 +60,7 @@ class Controller:
         self.v_desired = 0.0
         self.y = 0.0
         self.x = 0.0
-        self.throttle_output_previous = np.array([0.0, 0.0, 0.0, 0.0])
+        self.throttle_output_previous = np.array([0.0, 0.0, 0.0, 0.0])  # np.zeros(4)
         self.v_previous_array = np.array([0.0, 0.0, 0.0, 0.0])
         self.v_array = np.array([0.0, 0.0, 0.0, 0.0])
         self.X2 = np.array([0.0, 0.0, 0.0, 0.0])
@@ -127,7 +127,7 @@ class Controller:
                     self.x2[t], self.y2[t] = row[0], row[1]
                     t += 1
 
-            for counted in range(self.h - 1):
+            for counted in range(self.h - 1):  #  in range(1, self.h - 1):
                 if counted > 0:
                     self.x2[counted] = float(self.x2[counted])
                     self.y2[counted] = float(self.y2[counted])
@@ -151,26 +151,6 @@ class Controller:
     def rti_connext(self):
         connector = rti.Connector("SCADE_DS_Controller::Controller", "RtiSCADE_DS_Controller.xml")
         self.vehicle_State = connector.get_input("vehicleStateOutSub::vehicleStateOutReader")
-        """        # self.camRoadLinesF1Sub = connector.get_input("camRoadLinesF1Sub::camRoadLinesF1Reader")
-        # self.camRoadLinesF2Sub = connector.get_input("camRoadLinesF2Sub::camRoadLinesF2Reader")
-        # self.camRoadLinesFLSub = connector.get_input("camRoadLinesFLSub::camRoadLinesFLReader")
-        # self.camRoadLinesFRSub = connector.get_input("camRoadLinesFRSub::camRoadLinesFRReader")
-        # self.camRoadLinesRLSub = connector.get_input("camRoadLinesRLSub::camRoadLinesRLReader")
-        # self.camRoadLinesRRSub = connector.get_input("camRoadLinesRRSub::camRoadLinesRRReader")
-        # self.radarFSub = connector.get_input("radarFSub::radarFReader")
-        # self.radarPortSub = connector.get_input("radarPortSub::radarPortReader")
-        # self.radarRSub = connector.get_input("radarRSub::radarRReader")
-        # self.radarStbdSub = connector.get_input("radarStbdSub::radarStbdReader")
-        # self.lidarLaserMeter_FlashBSub = connector.get_input("lidarLaserMeter_FlashBSub::lidarLaserMeter_FlashBReader")
-        # self.camMTBoxesF1Sub = connector.get_input("camMTBoxesF1Sub::MTBoxesF1Reader")
-        # self.camMTBoxesF2Sub = connector.get_input("camMTBoxesF2Sub::MTBoxesF2Reader")
-        # self.camMTBoxesFLSub = connector.get_input("camMTBoxesFLSub::MTBoxesFLReader")
-        # self.camMTBoxesFRSub = connector.get_input("camMTBoxesFRSub::MTBoxesFRReader")
-        # self.camMTBoxesRLSub = connector.get_input("camMTBoxesRLSub::MTBoxesRLReader")
-        # self.camMTBoxesRRSub = connector.get_input("camMTBoxesRRSub::MTBoxesRRReader")
-        # self.gpsGPSSub = connector.get_input("gpsGPSSub::gpsGPSReader")
-        # self.lidarLaserMeter_FlashASub = connector.get_input("lidarLaserMeter_FlashASub::lidarLaserMeter_FlashAReader")
-        # self.lidarLaserMeter_FlashCSub = connector.get_input("lidarLaserMeter_FlashCSub::lidarLaserMeter_FlashCReader")"""
         self.simWait = connector.get_input("simWaitSub::simWaitReader")
         self.vehicleCorrect = connector.getOutput("toVehicleModelCorrectivePub::toVehicleModelCorrectiveWriter")
         self.vehicleSteer = connector.getOutput("toVehicleSteeringPub::toVehicleSteeringWriter")
@@ -179,7 +159,6 @@ class Controller:
 
     def update_state(self, env: Env):
         self.x, self.y, self.yaw, self.v = env.state
-        pass
 
     def run_controller_timestep(self, waypoints=0):
         if waypoints == 0:

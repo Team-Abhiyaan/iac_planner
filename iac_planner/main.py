@@ -23,6 +23,7 @@ GLOBAL_PATH_CSV_FILE = "./resources/velocityProfileMu85.csv"
 logging.basicConfig(level=logging.NOTSET)
 _logger = logging.getLogger(__name__)
 
+
 def main(args: Optional[Iterable[str]] = None):
     env: Env = Env()
     env.global_path_handler.load_from_csv(GLOBAL_PATH_CSV_FILE)
@@ -107,16 +108,15 @@ def main(args: Optional[Iterable[str]] = None):
                     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
 
                 # TODO: Run controller
-                def controller(trajectory):
-                    return "outputs"
 
-                controller(trajectory)
+                throttle, steer = controller.run_controller_timestep(env, trajectory)
 
-                # Publish to the RTI connext Writers
-                # vehicle_correct, vehicle_steer
+                vehicle_steer.instance.setNumber("AdditiveSteeringWheelAngle", steer)
+                vehicle_correct.instance.setNumber("AcceleratorAdditive", throttle)
+                vehicle_correct.write()
+                vehicle_steer.write()
 
                 sim_done.write()
-
 
     except KeyboardInterrupt:
         info("Keyboard interrupt")

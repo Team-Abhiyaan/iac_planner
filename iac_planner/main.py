@@ -10,6 +10,7 @@ import numpy as np
 from rticonnextdds_connector import Input
 import rticonnextdds_connector as rti
 
+from iac_planner.controller import Controller
 from iac_planner.generate_paths import generate_paths
 from iac_planner.generate_velocity_profile import generate_velocity_profile
 from iac_planner.helpers import Env, state_t
@@ -50,6 +51,8 @@ def main(args: Optional[Iterable[str]] = None):
             vehicle_steer = connector.getOutput("toVehicleSteeringPub::toVehicleSteeringWriter")
             sim_done = connector.getOutput("toSimDonePub::toSimDoneWriter")
             sim_done.write()
+
+            controller = Controller()
 
             while True:
                 # for reader in inputs.list():

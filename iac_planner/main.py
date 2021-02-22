@@ -37,13 +37,17 @@ def main(args: Optional[Iterable[str]] = None):
     try:
         with rti.open_connector(config_name="SCADE_DS_Controller::Controller",
                                 url="resources/RtiSCADE_DS_Controller_ego1.xml") as connector:
+            info('Opened RTI')
+
             # Readers
             class Inputs:
-                sim_wait: Input = connector.get_input("simWaitSub::simWaitReader"),
+                sim_wait: Input = connector.get_input("simWaitSub::simWaitReader")
                 vehicle_state: Input = connector.get_input("vehicleStateOutSub::vehicleStateOutReader")
+                track_polys: Input = connector.get_input("camRoadLinesF1Sub::camRoadLinesF1Reader")
+                other_vehicle_states: Input = connector.get_input("radarFSub::radarFReader")
 
                 def list(self) -> Iterable[Input]:
-                    return [self.sim_wait, self.vehicle_state]
+                    return [self.sim_wait, self.vehicle_state, self.track_polys, self.other_vehicle_states]
 
             inputs = Inputs()
 
@@ -52,54 +56,17 @@ def main(args: Optional[Iterable[str]] = None):
             vehicle_steer = connector.getOutput("toVehicleSteeringPub::toVehicleSteeringWriter")
             sim_done = connector.getOutput("toSimDonePub::toSimDoneWriter")
             sim_done.write()
+            info('Wrote sim done')
 
             controller = Controller()
 
             while True:
-                # for reader in inputs.list():
-                #     reader.wait()
-                #     reader.take()
-                inputs.list()[1].wait()
-                inputs.list()[1].take()
-
-                # read values to env
-                state_in = inputs.vehicle_state.samples[-1]
-                env.state[0] = state_in["cdgPos_x"]
-                env.state[1] = state_in["cdgPos_y"]
-                env.state[1] = state_in["cdgSpeed_heading"]
-                env.state[2] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
-                env.gear = state_in["GearEngaged"]
+                info('Loading rti')
+                load_rti(env, inputs)
+                info('Loaded RTI inputs')
 
                 trajectory = None
                 try:
-                    # TODO: Load track Boundaries as Obstacles
-                    track_polys = connector.get_input("camRoadLinesF1Sub::camRoadLinesF1Reader")
-                    track_polys.wait()
-                    track_polys.take()
-
-                    for track_poly in track_polys.samples.valid_data_iter:
-                        roadlinepolyarray = track_poly['roadLinesPolynomsArray']
-                        left_array = roadlinepolyarray[0]
-                        right_array = roadlinepolyarray[1]
-                        env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
-                                                        left_array['c3'])
-                        env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
-                                                         right_array['c3'])
-
-                    # TODO: Load dynamic vehicles
-                    other_vehicle_states = connector.get_input("radarFSub::radarFReader")
-                    other_vehicle_states.wait()
-                    other_vehicle_states.take()
-
-                    env.other_vehicle_states = []
-                    for other_vehicle_state in other_vehicle_states.samples.valid_data_iter:
-                        targetsArray = other_vehicle_state['targetsArray']
-                        x = targetsArray['posXInChosenRef']
-                        y = targetsArray['posYInChosenRef']
-                        yaw = targetsArray['posHeadingInChosenRef']
-                        v = targetsArray['absoluteSpeedX']
-
-                        env.other_vehicle_states[0] = np.array([x, y, yaw, v])
 
                     trajectory = run(env)
                     if trajectory is None:
@@ -120,6 +87,51 @@ def main(args: Optional[Iterable[str]] = None):
 
     except KeyboardInterrupt:
         info("Keyboard interrupt")
+
+
+def load_rti(env, inputs):
+    # for reader in inputs.list():
+    #     reader.wait()
+    #     reader.take()
+    inputs.sim_wait.wait()
+    inputs.sim_wait.take()
+    env.info('Got SIm wati')
+    inputs.vehicle_state.wait()
+    inputs.vehicle_state.take()
+    env.info('Got state')
+
+    # read values to env
+    state_in = inputs.vehicle_state.samples[-1]
+    env.state[0] = state_in["cdgPos_x"]
+    env.state[1] = state_in["cdgPos_y"]
+    env.state[1] = state_in["cdgSpeed_heading"]
+    env.state[2] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
+    env.gear = state_in["GearEngaged"]
+    # TODO: Load track Boundaries as Obstacles
+    track_polys = inputs.track_polys
+    track_polys.wait()
+    track_polys.take()
+    for track_poly in track_polys.samples.valid_data_iter:
+        roadlinepolyarray = track_poly['roadLinesPolynomsArray']
+        left_array = roadlinepolyarray[0]
+        right_array = roadlinepolyarray[1]
+        env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
+                                        left_array['c3'])
+        env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
+                                         right_array['c3'])
+    # TODO: Load dynamic vehicles
+    other_vehicle_states = inputs.other_vehicle_states
+    other_vehicle_states.wait()
+    other_vehicle_states.take()
+    env.other_vehicle_states = []
+    for other_vehicle_state in other_vehicle_states.samples.valid_data_iter:
+        targetsArray = other_vehicle_state['targetsArray']
+        x = targetsArray['posXInChosenRef']
+        y = targetsArray['posYInChosenRef']
+        yaw = targetsArray['posHeadingInChosenRef']
+        v = targetsArray['absoluteSpeedX']
+
+        env.other_vehicle_states[0] = np.array([x, y, yaw, v])
 
 
 def run(env: Env):

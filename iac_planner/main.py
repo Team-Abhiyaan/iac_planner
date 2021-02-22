@@ -30,6 +30,7 @@ def main(args: Optional[Iterable[str]] = None):
 
     np_path = env.global_path_handler.global_path.to_numpy()[:, :2]
     env.path = np.vstack([np_path] * 6 + [np_path[:20, :]])
+    print(env.path)
     info: Callable[[str], None] = _logger.info
     env.info = info
     info("Starting up...")
@@ -66,9 +67,12 @@ def main(args: Optional[Iterable[str]] = None):
                 info('Loaded RTI inputs')
 
                 trajectory = None
-                trajectory = run(env)
+                # trajectory = run(env)
                 if trajectory is None:
-                    trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
+                    # print(env.path[:18, :])
+                    update_global_path(env)
+                    trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :].copy())
+                    # print(env.path[:18, :], trajectory)
                 # except Exception:
                 #     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
 
@@ -103,8 +107,8 @@ def load_rti(env, inputs):
         pass
     env.state[0] = state_in["cdgPos_x"]
     env.state[1] = state_in["cdgPos_y"]
-    env.state[1] = state_in["cdgSpeed_heading"]
-    env.state[2] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
+    env.state[2] = state_in["cdgSpeed_heading"]
+    env.state[3] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
     env.gear = state_in["GearEngaged"]
     # TODO: Load track Boundaries as Obstacles
     track_polys = inputs.track_polys
@@ -167,12 +171,15 @@ def run(env: Env):
 def update_global_path(env: Env):
     def line_behind_vehicle(x: float, y: float) -> float:
         p: state_t = env.state
+        print(np.cos(p[2]), np.sin(p[2]), p[0], p[1])
         return (x - p[0]) * np.cos(p[2]) + (y - p[1]) * np.sin(p[2])
 
     def is_behind(x: float, y: float) -> bool:
-        return line_behind_vehicle(x, y) > 0
+        return line_behind_vehicle(x, y) < 0
 
     while is_behind(*env.path[0]):
+        print('reduced point')
+        # print(env.path[:2, :])
         env.path = env.path[1:, :]
 
 

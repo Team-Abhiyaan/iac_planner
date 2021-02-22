@@ -161,10 +161,10 @@ class Controller:
 
     def run_controller_timestep(self, env, trajectory=None):
         # if trajectory is None:
-        #     print("INFO: GEtting default path")
-        #     i = self.globalpathi
-        #     waypoints = self.globalWaypoints
-        #     # print((len(waypoints), 1))
+        # print("INFO: GEtting default path")
+        # i = self.globalpathi
+        # waypoints = self.globalWaypoints
+        # print((len(waypoints), 1))
         # else:
         waypoints = []
         for pt, vel in zip(*trajectory):

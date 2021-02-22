@@ -66,13 +66,11 @@ def main(args: Optional[Iterable[str]] = None):
                 info('Loaded RTI inputs')
 
                 trajectory = None
-                try:
-
-                    trajectory = run(env)
-                    if trajectory is None:
-                        trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
-                except Exception:
+                trajectory = run(env)
+                if trajectory is None:
                     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
+                # except Exception:
+                #     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
 
                 # TODO: Run controller
 
@@ -101,7 +99,8 @@ def load_rti(env, inputs):
     env.info('Got state')
 
     # read values to env
-    state_in = inputs.vehicle_state.samples[-1]
+    for state_in in inputs.vehicle_state.samples.valid_data_iter:
+        pass
     env.state[0] = state_in["cdgPos_x"]
     env.state[1] = state_in["cdgPos_y"]
     env.state[1] = state_in["cdgSpeed_heading"]
@@ -126,12 +125,14 @@ def load_rti(env, inputs):
     env.other_vehicle_states = []
     for other_vehicle_state in other_vehicle_states.samples.valid_data_iter:
         targetsArray = other_vehicle_state['targetsArray']
-        x = targetsArray['posXInChosenRef']
-        y = targetsArray['posYInChosenRef']
-        yaw = targetsArray['posHeadingInChosenRef']
-        v = targetsArray['absoluteSpeedX']
+        # print(targetsArray)
+        # x = targetsArray['posXInChosenRef']
+        # y = targetsArray['posYInChosenRef']
+        # yaw = targetsArray['posHeadingInChosenRef']
+        # v = targetsArray['absoluteSpeedX']
 
-        env.other_vehicle_states[0] = np.array([x, y, yaw, v])
+        # env.other_vehicle_states[0] = np.array([x, y, yaw, v])
+        env.other_vehicle_states.append(np.array([0,0,0,0]))
 
 
 def run(env: Env):
@@ -154,7 +155,7 @@ def run(env: Env):
     paths = generate_paths(env)
 
     best_trajectory, cost = score_paths(env, paths, max_path_len=env.path_generation_params.n_pts_long)
-
+    # print(len(best_trajectory[0]), len(best_trajectory[1]))
     if best_trajectory is not None:
         info(f"Lowest {cost=:.2f}: {best_trajectory[1][:4]}")
     else:
@@ -169,7 +170,7 @@ def update_global_path(env: Env):
         return (x - p[0]) * np.cos(p[2]) + (y - p[1]) * np.sin(p[2])
 
     def is_behind(x: float, y: float) -> bool:
-        return line_behind_vehicle(x, y) < 0
+        return line_behind_vehicle(x, y) > 0
 
     while is_behind(*env.path[0]):
         env.path = env.path[1:, :]

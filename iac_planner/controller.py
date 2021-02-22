@@ -160,12 +160,19 @@ class Controller:
     #     self.simDone.write()
 
     def run_controller_timestep(self, env, trajectory=None):
-        if trajectory is None:
-            i = self.globalpathi
-            waypoints = self.globalWaypoints
-        else:
-            waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
-            i = 1
+        # if trajectory is None:
+        #     print("INFO: GEtting default path")
+        #     i = self.globalpathi
+        #     waypoints = self.globalWaypoints
+        #     # print((len(waypoints), 1))
+        # else:
+        waypoints = []
+        for pt, vel in zip(*trajectory):
+            print([pt[0], pt[1], vel])
+            waypoints.append([pt[0], pt[1], vel])
+        # waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
+        i = 1
+        # print((waypoints[0], 2))
 
         self.x, self.y, self.yaw, self.v = env.state
         self.gear = env.gear
@@ -233,7 +240,7 @@ class Controller:
 
             deltaUpper = min(deltaUpper1, deltaUpper2)
             deltaLower = deltaLower1
-
+            
             self.v_desired = min(waypoints[i + 1][2], self.v + deltaUpper)
 
             accel_desired = (waypoints[i + 2][2] * waypoints[i + 2][2] - waypoints[i + 1][2] * waypoints[i + 1][
@@ -393,13 +400,14 @@ class Controller:
         #            loopHelper+=1
         # else:
         #    loopHelper+=1
-        print('-------------------')
+        print('Control State Values')
+        print('--------Error-----------')
         print(self.v - self.v_desired, self.x_difference, self.y_difference)
-        print('-------------------')
+        print('--------Throttle-----------')
         print(self.throttle_output)
-        print('-------------------')
+        print('---------Brake----------')
         print(self.brake_output)
-        print('-------------------')
+        print('--------Steer-----------')
         print(self.steer_output)
         print('-------------------')
 
@@ -425,107 +433,107 @@ class Controller:
                         j = j-1054+39
                     i = j + 2
         '''
-        a_indy = 0
-        self.lap = waypoints[i][3]
-        self.nozero = 0
-        if self.lap == 0 and self.nozero == 0:
-            for j in range(0, 5):
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    print(i, waypoints[i][3])
-                    if self.lap == waypoints[j][3]:
-                        # if waypoints[i][3] == waypoints[j][3]:
-                        dist = np.sqrt(
-                            np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                        a_indy = j + 2
-                    # if j == 4:
-                    # 	self.lap += 1
-        if self.lap == 1 and self.noone == 0:
-            self.nozero = 1
-            for j in range(5, 1020):
+        #a_indy = 0
+        # self.lap = waypoints[i][3]
+        # self.nozero = 0
+        # if self.lap == 0 and self.nozero == 0:
+        #     for j in range(0, 5):
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             print(i, waypoints[i][3])
+        #             if self.lap == waypoints[j][3]:
+        #                 # if waypoints[i][3] == waypoints[j][3]:
+        #                 dist = np.sqrt(
+        #                     np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                 a_indy = j + 2
+        #             # if j == 4:
+        #             # 	self.lap += 1
+        # if self.lap == 1 and self.noone == 0:
+        #     self.nozero = 1
+        #     for j in range(5, 1020):
 
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    if i < 1015 and j < 1015:
-                        print(i, waypoints[i][3])
-                        if self.lap == waypoints[j][3]:
-                            # if waypoints[i][3] == waypoints[j][3]:
-                            dist = np.sqrt(
-                                np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                            a_indy = j + 2
-                        # if j == 1019:
-                        # 	self.lap += 1
-                    elif i > 1015 and j > 1015:
-                        self.lap += 1
-        if self.lap == 2 and self.notwo == 0:
-            self.noone = 1
-            for j in range(1020, 2035):
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    if i < 2020 and j < 2020:
-                        print(i, waypoints[i][3])
-                        if self.lap == waypoints[j][3]:
-                            # if waypoints[i][3] == waypoints[j][3]:
-                            dist = np.sqrt(
-                                np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                            a_indy = j + 2
-                        # if j == 2034:
-                        # 	self.lap += 1
-                    elif i > 2020 and j > 2020:
-                        self.lap += 1
-        if self.lap == 3 and self.nothree == 0:
-            self.notwo = 1
-            for j in range(2035, 3050):
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    if i < 3035 and j < 3035:
-                        print(i, waypoints[i][3])
-                        if self.lap == waypoints[j][3]:
-                            # if waypoints[i][3] == waypoints[j][3]:
-                            dist = np.sqrt(
-                                np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                            a_indy = j + 2
-                        # if j == 3049:
-                        # 	self.lap += 1
-                    elif i > 3035 and j > 3035:
-                        self.lap += 1
-        if self.lap == 4 and self.nofour == 0:
-            self.nothree = 1
-            for j in range(3050, 4065):
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    if i < 4050 and j < 4050:
-                        print(i, waypoints[i][3])
-                        if self.lap == waypoints[j][3]:
-                            # if waypoints[i][3] == waypoints[j][3]:
-                            dist = np.sqrt(
-                                np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                            a_indy = j + 2
-                        # if j == 4064:
-                        # 	self.lap += 1
-                    elif i > 4050 and j > 4050:
-                        self.lap += 1
-        if self.lap == 5 and self.nofive == 0:
-            self.nofour = 1
-            for j in range(4065, 5080):
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    if i < 5065 and j < 5065:
-                        print(i, waypoints[i][3])
-                        if self.lap == waypoints[j][3]:
-                            # if waypoints[i][3] == waypoints[j][3]:
-                            dist = np.sqrt(
-                                np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                            a_indy = j + 2
-                        # if j == 5079:
-                        # 	self.lap += 1
-                    elif i > 5065 and j > 5065:
-                        self.lap += 1
-        if self.lap == 6:
-            self.nofive = 1
-            for j in range(5080, len(waypoints)):
-                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
-                    if i < len(waypoints) and j < len(waypoints):
-                        print(i, waypoints[i][3])
-                        if self.lap == waypoints[j][3]:
-                            # if waypoints[i][3] == waypoints[j][3]:
-                            dist = np.sqrt(
-                                np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
-                            a_indy = j + 2
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             if i < 1015 and j < 1015:
+        #                 print(i, waypoints[i][3])
+        #                 if self.lap == waypoints[j][3]:
+        #                     # if waypoints[i][3] == waypoints[j][3]:
+        #                     dist = np.sqrt(
+        #                         np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                     a_indy = j + 2
+        #                 # if j == 1019:
+        #                 # 	self.lap += 1
+        #             elif i > 1015 and j > 1015:
+        #                 self.lap += 1
+        # if self.lap == 2 and self.notwo == 0:
+        #     self.noone = 1
+        #     for j in range(1020, 2035):
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             if i < 2020 and j < 2020:
+        #                 print(i, waypoints[i][3])
+        #                 if self.lap == waypoints[j][3]:
+        #                     # if waypoints[i][3] == waypoints[j][3]:
+        #                     dist = np.sqrt(
+        #                         np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                     a_indy = j + 2
+        #                 # if j == 2034:
+        #                 # 	self.lap += 1
+        #             elif i > 2020 and j > 2020:
+        #                 self.lap += 1
+        # if self.lap == 3 and self.nothree == 0:
+        #     self.notwo = 1
+        #     for j in range(2035, 3050):
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             if i < 3035 and j < 3035:
+        #                 print(i, waypoints[i][3])
+        #                 if self.lap == waypoints[j][3]:
+        #                     # if waypoints[i][3] == waypoints[j][3]:
+        #                     dist = np.sqrt(
+        #                         np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                     a_indy = j + 2
+        #                 # if j == 3049:
+        #                 # 	self.lap += 1
+        #             elif i > 3035 and j > 3035:
+        #                 self.lap += 1
+        # if self.lap == 4 and self.nofour == 0:
+        #     self.nothree = 1
+        #     for j in range(3050, 4065):
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             if i < 4050 and j < 4050:
+        #                 print(i, waypoints[i][3])
+        #                 if self.lap == waypoints[j][3]:
+        #                     # if waypoints[i][3] == waypoints[j][3]:
+        #                     dist = np.sqrt(
+        #                         np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                     a_indy = j + 2
+        #                 # if j == 4064:
+        #                 # 	self.lap += 1
+        #             elif i > 4050 and j > 4050:
+        #                 self.lap += 1
+        # if self.lap == 5 and self.nofive == 0:
+        #     self.nofour = 1
+        #     for j in range(4065, 5080):
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             if i < 5065 and j < 5065:
+        #                 print(i, waypoints[i][3])
+        #                 if self.lap == waypoints[j][3]:
+        #                     # if waypoints[i][3] == waypoints[j][3]:
+        #                     dist = np.sqrt(
+        #                         np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                     a_indy = j + 2
+        #                 # if j == 5079:
+        #                 # 	self.lap += 1
+        #             elif i > 5065 and j > 5065:
+        #                 self.lap += 1
+        # if self.lap == 6:
+        #     self.nofive = 1
+        #     for j in range(5080, len(waypoints)):
+        #         if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+        #             if i < len(waypoints) and j < len(waypoints):
+        #                 print(i, waypoints[i][3])
+        #                 if self.lap == waypoints[j][3]:
+        #                     # if waypoints[i][3] == waypoints[j][3]:
+        #                     dist = np.sqrt(
+        #                         np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
+        #                     a_indy = j + 2
 
         # for j in range(i-2,i+30):
         #     if dist >= np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0])):
@@ -539,12 +547,12 @@ class Controller:
 
         # i = a_indy
         # i = i+1
-        self.globalpathi = a_indy
-        self.globalpathi = self.globalpathi + 1
-        self.lap = waypoints[self.globalpathi][3]
+        #self.globalpathi = a_indy
+        #self.globalpathi = self.globalpathi + 1
+        #self.lap = waypoints[self.globalpathi][3]
 
-        print("Index I")
-        print(self.globalpathi)
+        #print("Index I")
+        #print(self.globalpathi)
         self.steer_previous = self.fangle
         self.prev_diffangle = self.diffangle
         self.runCount += 1

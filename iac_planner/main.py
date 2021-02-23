@@ -67,11 +67,11 @@ def main(args: Optional[Iterable[str]] = None):
                 info('Loaded RTI inputs')
 
                 trajectory = None
-                # trajectory = run(env)
+                trajectory = run(env)
                 if trajectory is None:
                     # print(env.path[:18, :])
                     update_global_path(env)
-                    trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :].copy())
+                    trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
                     # print(env.path[:18, :], trajectory)
                 # except Exception:
                 #     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])

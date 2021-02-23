@@ -4,7 +4,7 @@ from iac_planner.helpers import Env, path_t
 
 def getRadius(index, path: path_t):
     waypoint= [[0.0 for xx in range(4)] for yy in range(len(path)-1)] 
-    x, y = path[:, 0], path[:, 1]
+    x, y = path[:, 0].copy(), path[:, 1].copy()
 
     for counted in range(len(path)-2):
         if counted > 0:
@@ -18,7 +18,7 @@ def getRadius(index, path: path_t):
     A= np.array([[2*a-2*c,2*b-2*dd],[2*a-2*e,2*b-2*f]])
     B= np.array([c*c+dd*dd-a*a-b*b,e*e+f*f-a*a-b*b])
     
-    if (a-c)*(b-f) == (a-e)*(dd-b):
+    if (a-c)*(b-f) == (a-e)*(dd-b) or np.linalg.det(A) == 0:
         return 100000000000000000.0
     else:
         solution= np.linalg.solve(A,B)
@@ -28,7 +28,7 @@ def BetterPredict(index, waypoints,N ,v,theta,env: Env, path: path_t):
     #waypoints[index][3]= np.sqrt((-np.sqrt(tmp1) - dragCoeff*tempVel*tempVel - rollingFriction)*2*d/m + v[xx-1]*v[xx-1])
     #tmp1= np.square(mu*N) - np.square(m*tempVel*tempVel*math.cos((theta[index-1]+theta[index-2])/2)/R - m*9.81*math.sin((theta[index-1]+theta[index-2])/2))
     param = env.vel_params
-    tempVel = param.tempVel
+    tempVel = waypoints[index][3]
     m = param.m
     mu = param.mu
     rollingFriction = param.rolling_friction
@@ -36,7 +36,7 @@ def BetterPredict(index, waypoints,N ,v,theta,env: Env, path: path_t):
     dragCoeff = param.dragCoeff
 
     tempVel= waypoints[index][3]
-    R= getRadius(index,path)
+    R= getRadius(index,path.copy())
     
     tmp1= np.square(mu*N) - np.square(m*tempVel*tempVel*math.cos((theta[index-1]+theta[index])/2)/R - m*9.81*math.sin((theta[index-1]+theta[index])/2))
 
@@ -50,10 +50,10 @@ def BetterPredict(index, waypoints,N ,v,theta,env: Env, path: path_t):
     
     print(waypoints[index-1][3], LowerLimit)
     if waypoints[index-1][3]< LowerLimit:
-        print("4")
-        return BetterPredict(index-1, waypoints,N ,v ,theta,env,path)
+        # print("4")
+        return BetterPredict(index-1, waypoints,N ,v ,theta,env,path.copy())
     else:
-        print("5")
+        # print("5")
         return waypoints
 
 def stepBack(index, tempVelocity, N ,v ,theta, waypoints,env: Env, path: path_t):
@@ -73,7 +73,7 @@ def stepBack(index, tempVelocity, N ,v ,theta, waypoints,env: Env, path: path_t)
             secondaryWaypoints[k][kk]= waypoints[k][kk]
     
 
-    x, y = path[:, 0], path[:, 1]
+    x, y = path[:, 0].copy(), path[:, 1].copy()
     
 
     for counted in range(h-1):
@@ -85,7 +85,7 @@ def stepBack(index, tempVelocity, N ,v ,theta, waypoints,env: Env, path: path_t)
 
     #tempVelocity= (waypoints[xx-1][3]) + (waypoints[xx-1][3]-waypoints[xx-2][3])/2
     secondaryWaypoints[index-1][3]= tempVelocity
-    R= getRadius(index-1,path)
+    R= getRadius(index-1,path.copy())
     
     tempVel= (waypoints[index-2][3]) + (waypoints[index-2][3]-waypoints[index-3][3])/2
     
@@ -97,7 +97,7 @@ def stepBack(index, tempVelocity, N ,v ,theta, waypoints,env: Env, path: path_t)
     
     if secondaryWaypoints[index-1][3]< LowerLimit:
         print("2")
-        return BetterPredict(index-1, secondaryWaypoints,N ,v ,theta,env, path)
+        return BetterPredict(index-1, secondaryWaypoints,N ,v ,theta,env, path.copy())
     else:
         print("3")
         return secondaryWaypoints
@@ -116,7 +116,7 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
     # e.g.
     # if a > foo(a): a = foo(a)
     # if a > (a_max := foo(a)): a = a_max)
-
+    # path.flags.writeable = False
     v = np.zeros(len(path) - 1)
     deltav = np.zeros(len(path) - 1)
     theta = np.zeros(len(path) - 1)
@@ -127,15 +127,17 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
     waypoint= [[0.0 for xx in range(4)] for yy in range(len(path) - 1)] 
     waypoints= [[0.0 for xx in range(4)] for yy in range(len(path) - 1)]
 
-    x, y = path[:, 0], path[:, 1]
+    x, y = path[:, 0].copy(), path[:, 1].copy()
+
+    a,b,c = 0.0,0.0,0.0
 
     for counted in range(len(path) - 2):
         if counted > 0:
             x[counted-1] = float(x[counted])
             y[counted-1] = float(y[counted]) 
             waypoint[counted-1][0] = float(x[counted])
-            waypoint[counted-1][1] = float(y[counted])
-                
+            waypoint[counted-1][1] = float(y[counted])   
+
     waypoints[0][3] = v[0]
 
     for xx in range(1, len(path) - 2):
@@ -150,7 +152,7 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
         N = m*9.81*np.cos(theta[xx]) + downforceCoeff*np.square(v[xx])
 
         # TODO: What are these magic numbers? g and __ Cd ?
-        d = 10
+        d = 4.0
         u = v[xx - 1]
         theta[xx] = 0.0
         theta[xx+1] = 0.0
@@ -163,7 +165,7 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
         if tempVelo == 0:
             tempVelo= 0.000000000001
 
-        R = getRadius(xx, path)
+        R = getRadius(xx, path.copy())
 
         alphar= (630/1.9)*tempVelo/(9.81*R*Calpha)
         #introduce the longitudinal load transfer later
@@ -179,7 +181,7 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
         if tmp1 < 0:
             tempVelocity= np.sqrt((mu*N + m*9.81*math.sin((theta[xx]+theta[xx+1])/2))*R/(m*math.cos((theta[xx]+theta[xx+1])/2)))
 
-            waypoints= stepBack(xx, tempVelocity, N ,v ,theta, waypoints, path)
+            waypoints= stepBack(xx, tempVelocity, N ,v ,theta, waypoints, path.copy())
             if xx> 1:
                 tempVelo= (waypoints[xx-1][3]) + (waypoints[xx-1][3]-waypoints[xx-2][3])/2 
             else: 
@@ -202,5 +204,10 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
         deltav[xx]= deltaUpper
 
         v[xx]= waypoints[xx-1][3] + deltav[xx]
+        
+        waypoints[xx][0]= x[xx]
+        waypoints[xx][1]= y[xx]
+        # waypoints[xx][2]= z[xx]
+        waypoints[xx][3]= v[xx]
 
     return v

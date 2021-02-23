@@ -15,8 +15,8 @@ class Weights:
 
 @dataclass
 class VelParams:
-    m: float = 730.0
-    mu: float = 0.6
+    m: float = 630.0
+    mu: float = 0.85
     rolling_friction: float = 100.0
     d: float =4
     tempVel: float= 0.0
@@ -25,9 +25,9 @@ class VelParams:
     downforceCoeff: float= 0.965
     alphar: float = 0.0
     Calpha: float = 867
-    dragCoeff: float = 0.5
-    maxPower: float= 294000
-    FintoV: float = 294000
+    dragCoeff: float = 0.445
+    maxPower: float= 314000
+    FintoV: float = 314000
     back: float = 10
 
 

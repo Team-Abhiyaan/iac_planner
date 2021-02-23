@@ -116,30 +116,33 @@ def load_rti(env, inputs):
     track_polys = inputs.track_polys
     track_polys.wait()
     track_polys.take()
+    track_poly = None
     for track_poly in track_polys.samples.valid_data_iter:
-        roadlinepolyarray = track_poly['roadLinesPolynomsArray']
-        left_array = roadlinepolyarray[0]
-        right_array = roadlinepolyarray[1]
-        env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
-                                        left_array['c3'])
-        env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
-                                         right_array['c3'])
+        pass
+    roadlinepolyarray = track_poly['roadLinesPolynomsArray']
+    left_array = roadlinepolyarray[0]
+    right_array = roadlinepolyarray[1]
+    env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
+                                    left_array['c3'])
+    env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
+                                     right_array['c3'])
 
     # TODO: Load dynamic vehicles
     other_vehicle_states = inputs.other_vehicle_states
     other_vehicle_states.wait()
     other_vehicle_states.take()
     env.other_vehicle_states = []
-    for other_vehicle_state in other_vehicle_states.samples.valid_data_iter:
-        targetsArray = other_vehicle_state['targetsArray']
-        # print(targetsArray)
-        # x = targetsArray['posXInChosenRef']
-        # y = targetsArray['posYInChosenRef']
-        # yaw = targetsArray['posHeadingInChosenRef']
-        # v = targetsArray['absoluteSpeedX']
-
-        # env.other_vehicle_states[0] = np.array([x, y, yaw, v])
-        env.other_vehicle_states.append(np.array([0, 0, 0, 0]))
+    other_vehicles = None
+    for other_vehicles in other_vehicle_states.samples.valid_data_iter:
+        pass
+    targetsArray = other_vehicles['targetsArray']
+    print(len(targetsArray))
+    for other_vehicle in targetsArray:
+        x = other_vehicle['posXInChosenRef']
+        y = other_vehicle['posYInChosenRef']
+        yaw = other_vehicle['posHeadingInChosenRef']
+        v = other_vehicle['absoluteSpeedX']
+        env.other_vehicle_states.append(np.array([x, y, yaw, v]))
 
 
 def run(env: Env):

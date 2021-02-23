@@ -45,7 +45,7 @@ class CollisionChecker:
 
         #     self._other_vehicle_paths[i] = vehicle_path
 
-        self.other_vech_current_vel = other_vehicle_states[0][3]
+        self.other_vech_current_vel = None if len(other_vehicle_states) == 0 else other_vehicle_states[0][3]
 
         # Takes in a set of obstacle borders and path waypoints and returns
         # a boolean collision check array that tells if a path has an obstacle

@@ -85,7 +85,7 @@ def main(args: Optional[Iterable[str]] = None):
                 vehicle_steer.write()
 
                 sim_done.write()
-                info("="*20)
+                info("=" * 20)
 
     except KeyboardInterrupt:
         info("Keyboard interrupt")
@@ -165,6 +165,19 @@ def run(env: Env):
         info(f"Lowest {cost=:.2f}")
     else:
         info("ERROR: No trajectory found.")
+
+    if env.plot_paths:
+        import matplotlib.pyplot as plt
+        plt.clf()
+        plt.gca().set_aspect('equal', adjustable='box')
+        # from iac_planner.collision_check import CollisionChecker
+        # obs = CollisionChecker(env, 20, time_step=0.5).obstacles
+        # plt.scatter(*zip(*obs), label='obstacles')
+        plt.scatter(*env.path[:20].T, label='global path')
+        plt.scatter(*best_trajectory[0].T, label='local path')
+        plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]), head_width=5, label='vehicle')
+        plt.legend()
+        plt.pause(0.01)
 
     return best_trajectory
 

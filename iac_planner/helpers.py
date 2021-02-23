@@ -74,3 +74,5 @@ class Env:
     right_poly: RoadLinePolynom = None
 
     global_path_handler: GlobalPathHandler = GlobalPathHandler()
+
+    plot_paths: bool = True

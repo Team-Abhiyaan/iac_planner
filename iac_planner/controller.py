@@ -159,20 +159,16 @@ class Controller:
     #     self.simDone = connector.getOutput("toSimDonePub::toSimDoneWriter")
     #     self.simDone.write()
 
-    def run_controller_timestep(self, env, trajectory=None):
-        # if trajectory is None:
-        # print("INFO: GEtting default path")
-        # i = self.globalpathi
-        # waypoints = self.globalWaypoints
-        # print((len(waypoints), 1))
-        # else:
+    def run_controller_timestep(self, env, trajectory):  # trajectory: Tuple[path_t, List[float]]
         waypoints = []
         for pt, vel in zip(*trajectory):
-            print([pt[0], pt[1], vel])
             waypoints.append([pt[0], pt[1], vel])
         # waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
         i = 1
-        # print((waypoints[0], 2))
+
+        print(env.state)
+        for wpt in waypoints[:2]:
+            print(wpt)
 
         self.x, self.y, self.yaw, self.v = env.state
         self.gear = env.gear
@@ -400,16 +396,21 @@ class Controller:
         #            loopHelper+=1
         # else:
         #    loopHelper+=1
-        print('Control State Values')
-        print('--------Error-----------')
-        print(self.v - self.v_desired, self.x_difference, self.y_difference)
-        print('--------Throttle-----------')
-        print(self.throttle_output)
-        print('---------Brake----------')
-        print(self.brake_output)
-        print('--------Steer-----------')
-        print(self.steer_output)
-        print('-------------------')
+
+        print('-------------Controller Error----------------')
+        print(f"v: {self.v - self.v_desired:.2f}\t x: {self.x_difference:.2f}\t y: {self.y_difference:.2f}")
+        print('------------Controller Outputs---------------')
+        print(f"throttle: {self.throttle_output:.2f}\t brake: {self.brake_output:.2f}\t steer: {self.steer_output:.2f}")
+        print('---------------------------------------------')
+
+        # print('Control State Values')
+        # print('--------Throttle-----------')
+        # print(self.throttle_output)
+        # print('---------Brake----------')
+        # print(self.brake_output)
+        # print('--------Steer-----------')
+        # print(self.steer_output)
+        # print('-------------------')
 
         self.v_pre_previous = self.v_previous
         self.v_previous = self.v
@@ -557,7 +558,6 @@ class Controller:
         self.prev_diffangle = self.diffangle
         self.runCount += 1
 
-        print(self.steer_output)
 
         return self.throttle_output, self.steer_output
 

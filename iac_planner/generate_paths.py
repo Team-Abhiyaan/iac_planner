@@ -23,8 +23,6 @@ def generate_paths(env) -> Generator[path_t, None, None]:
     if len(env.other_vehicle_states) != 0:
         state = env.other_vehicle_states[0]
         p_obs = Pose(state[0], state[1], yaw=state[2])
-        print(p_obs)
-        # p_obs.yaw = state[2]
 
     gen = SplineGenerator(env.global_path_handler, p, p_obs, env.left_poly, env.right_poly)
     params: PathGenerationParams = env.path_generation_params

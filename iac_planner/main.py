@@ -20,25 +20,27 @@ from iac_planner.score_paths import score_paths
 # TODO: update this
 GLOBAL_PATH_CSV_FILE = "./resources/velocityProfileMu85.csv"
 
-logging.basicConfig(level=logging.NOTSET)
+logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger(__name__)
 
 
 def main(args: Optional[Iterable[str]] = None):
     env: Env = Env()
-    env.global_path_handler.load_from_csv(GLOBAL_PATH_CSV_FILE)
-
-    np_path = env.global_path_handler.global_path.to_numpy()[:, :2]
-    env.path = np.vstack([np_path] * 6 + [np_path[:20, :]])
-    print(env.path)
     info: Callable[[str], None] = _logger.info
     env.info = info
+
     info("Starting up...")
+
+    env.global_path_handler.load_from_csv(GLOBAL_PATH_CSV_FILE)
+    np_path = env.global_path_handler.global_path.to_numpy()[:, :2]  # Take only (x, y) from path.
+    env.path = np.vstack([np_path] * 6 + [np_path[:20, :]])  # Repeat for 6 laps
+
+    info(f"Loaded path from {GLOBAL_PATH_CSV_FILE} of lenght {len(env.path)}")
 
     try:
         with rti.open_connector(config_name="SCADE_DS_Controller::Controller",
                                 url="resources/RtiSCADE_DS_Controller_ego1.xml") as connector:
-            info('Opened RTI')
+            info('Opened RTI Connector')
 
             # Readers
             class Inputs:
@@ -56,27 +58,24 @@ def main(args: Optional[Iterable[str]] = None):
             vehicle_correct = connector.getOutput("toVehicleModelCorrectivePub::toVehicleModelCorrectiveWriter")
             vehicle_steer = connector.getOutput("toVehicleSteeringPub::toVehicleSteeringWriter")
             sim_done = connector.getOutput("toSimDonePub::toSimDoneWriter")
+
             sim_done.write()
-            info('Wrote sim done')
 
             controller = Controller()
 
             while True:
-                info('Loading rti')
                 load_rti(env, inputs)
-                info('Loaded RTI inputs')
+                info('Got RTI inputs')
+
+                # Remove passed points
+                # Note fails if robot and path have very different orientations, check for that
+                update_global_path(env)
 
                 trajectory = None
                 trajectory = run(env)
                 if trajectory is None:
-                    # print(env.path[:18, :])
-                    update_global_path(env)
+                    info("Warning: Could not get trajectory, falling back to global path.")
                     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
-                    # print(env.path[:18, :], trajectory)
-                # except Exception:
-                #     trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
-
-                # TODO: Run controller
 
                 throttle, steer = controller.run_controller_timestep(env, trajectory)
 
@@ -86,6 +85,7 @@ def main(args: Optional[Iterable[str]] = None):
                 vehicle_steer.write()
 
                 sim_done.write()
+                info("="*20)
 
     except KeyboardInterrupt:
         info("Keyboard interrupt")
@@ -97,12 +97,13 @@ def load_rti(env, inputs):
     #     reader.take()
     inputs.sim_wait.wait()
     inputs.sim_wait.take()
-    env.info('Got SIm wati')
+    env.info('Got sim wait')
     inputs.vehicle_state.wait()
     inputs.vehicle_state.take()
     env.info('Got state')
 
     # read values to env
+    state_in = None
     for state_in in inputs.vehicle_state.samples.valid_data_iter:
         pass
     env.state[0] = state_in["cdgPos_x"]
@@ -110,6 +111,7 @@ def load_rti(env, inputs):
     env.state[2] = state_in["cdgSpeed_heading"]
     env.state[3] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
     env.gear = state_in["GearEngaged"]
+
     # TODO: Load track Boundaries as Obstacles
     track_polys = inputs.track_polys
     track_polys.wait()
@@ -122,6 +124,7 @@ def load_rti(env, inputs):
                                         left_array['c3'])
         env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
                                          right_array['c3'])
+
     # TODO: Load dynamic vehicles
     other_vehicle_states = inputs.other_vehicle_states
     other_vehicle_states.wait()
@@ -136,15 +139,11 @@ def load_rti(env, inputs):
         # v = targetsArray['absoluteSpeedX']
 
         # env.other_vehicle_states[0] = np.array([x, y, yaw, v])
-        env.other_vehicle_states.append(np.array([0,0,0,0]))
+        env.other_vehicle_states.append(np.array([0, 0, 0, 0]))
 
 
 def run(env: Env):
     info = env.info
-    # Remove passed points
-    # Note fails if robot and path have very different orientations, check for that
-
-    update_global_path(env)
 
     # # Publish Global Path and Current Position
     # visualize(env.m_pub, env.nh.get_clock(), 50, [env.state[:2]], scale=0.5,
@@ -159,11 +158,10 @@ def run(env: Env):
     paths = generate_paths(env)
 
     best_trajectory, cost = score_paths(env, paths, max_path_len=env.path_generation_params.n_pts_long)
-    # print(len(best_trajectory[0]), len(best_trajectory[1]))
     if best_trajectory is not None:
-        info(f"Lowest {cost=:.2f}: {best_trajectory[1][:4]}")
+        info(f"Lowest {cost=:.2f}")
     else:
-        info("No trajectory found.")
+        info("ERROR: No trajectory found.")
 
     return best_trajectory
 
@@ -171,15 +169,13 @@ def run(env: Env):
 def update_global_path(env: Env):
     def line_behind_vehicle(x: float, y: float) -> float:
         p: state_t = env.state
-        print(np.cos(p[2]), np.sin(p[2]), p[0], p[1])
         return (x - p[0]) * np.cos(p[2]) + (y - p[1]) * np.sin(p[2])
 
     def is_behind(x: float, y: float) -> bool:
         return line_behind_vehicle(x, y) < 0
 
     while is_behind(*env.path[0]):
-        print('reduced point')
-        # print(env.path[:2, :])
+        # print('Passed a point in global path.')
         env.path = env.path[1:, :]
 
 

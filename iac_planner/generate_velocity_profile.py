@@ -61,7 +61,7 @@ def stepBack(index, tempVelocity, N ,v ,theta, waypoints,env: Env, path: path_t)
     mu = param.mu
     dragCoeff = param.dragCoeff
     rollingFriction = param.rolling_friction
-    d = param.delta
+    d = param.d
     m = param.m
 
     w, h= 4, len(path) - 1
@@ -181,7 +181,7 @@ def generate_velocity_profile(env: Env, path: path_t) -> np.ndarray:
         if tmp1 < 0:
             tempVelocity= np.sqrt((mu*N + m*9.81*math.sin((theta[xx]+theta[xx+1])/2))*R/(m*math.cos((theta[xx]+theta[xx+1])/2)))
 
-            waypoints= stepBack(xx, tempVelocity, N ,v ,theta, waypoints, path.copy())
+            waypoints= stepBack(xx, tempVelocity, N ,v ,theta, waypoints, env, path.copy())
             if xx> 1:
                 tempVelo= (waypoints[xx-1][3]) + (waypoints[xx-1][3]-waypoints[xx-2][3])/2 
             else: 

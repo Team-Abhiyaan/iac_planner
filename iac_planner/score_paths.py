@@ -46,13 +46,13 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
             # Cross Track Error
             costs[j] += env.weights.cte * np.abs(distance_func(*pt))
 
-            # # Velocity Term
-            # if j != len(path) - 1:
-            #     costs[j] += env.weights.vel * 1.0 / (vel_profile[j] + 1.0)
-            #
-            # # Slope term:
-            # if j != len(path) - 1:
-            #     costs[j] += env.weights.slope * np.abs(slope(path, j) - slope(env.path, global_path_index))
+            # Velocity Term
+            if j != len(path) - 1:
+                costs[j] += env.weights.vel * 1.0 / (vel_profile[j] + 1.0)
+
+            # Slope term:
+            if j != len(path) - 1:
+                costs[j] += env.weights.slope * np.abs(slope(path, j) - slope(env.path, global_path_index))
 
             cost += costs[j]
 

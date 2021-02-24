@@ -4,32 +4,10 @@ import math
 
 class Controller:
     def __init__(self):
-        self.gear_efficiency = {
-            1: 0.91,
-            2: 0.91,
-            3: 0.91,
-            4: 0.96,
-            5: 0.96,
-            6: 0.96
-        }
-
         self.distance = 0.0
         self.y_difference = 0.0
         self.x_difference = 0.0
-        self.required_angle = 0.0
-        self.nozero = 0
-        self.noone = 0
-        self.notwo = 0
-        self.nothree = 0
-        self.nofour = 0
-        self.nofive = 0
-        self.lap = 0
 
-        self.i = 3
-        self.globalpathi = 3
-        # self.localpathi = 0
-        self.j = 0
-        self.k = 0
         self.fanglea = 0.0
         self.fangleb = 0.0
         self.fanglec = 0.0
@@ -45,18 +23,9 @@ class Controller:
         self.fangle = 0.0
         self.diffangle = 0.0
         self.steer_put = 0.0
-        self.acceleration = 0.0
-        self.acceleration_previous = 0.0
         self.globalWaypointsLength = 5102
-        self.x2 = [[0.0 for xxx in range(2)] for yyy in range(self.globalWaypointsLength)]
-        self.y2 = [[0.0 for xxx in range(2)] for yyy in range(self.globalWaypointsLength)]
         self.theta = [0.0] * self.globalWaypointsLength
         self.L = 3.5
-        self.w = 4
-        self.h = self.globalWaypointsLength
-        self.globalWaypoints = [[0.0 for xxx in range(self.w)] for yyy in range(self.h)]
-        self.dataGetter = [[0.0, 0.0, 0.0, 0.0, 0.0]]
-        self.loopHelper = 1
         self.throttle_output = 0.0
         self.steer_output = 0.0
         self.brake_output = 0.0
@@ -66,18 +35,10 @@ class Controller:
         self.x = 0.0
         self.yaw = 0.0
         self.gear = 1
-        self.throttle_output_previous = np.array([0.0, 0.0, 0.0, 0.0])  # np.zeros(4)
-        self.v_previous_array = np.array([0.0, 0.0, 0.0, 0.0])
-        self.v_array = np.array([0.0, 0.0, 0.0, 0.0])
-        self.X2 = np.array([0.0, 0.0, 0.0, 0.0])
-        self.A = np.array([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]])
-        self.B = np.array([0.0, 0.0, 0.0, 0.0])
 
         # values to be stored somewhere
-        self.runCount = 0
         self.v_req_previous = 0.0
         self.steer_previous = 0.0
-        self.acceleration_previous = 0.0
         self.v_previous = 42.66
         self.y_previous = -1835.977
         self.x_previous = -298.153
@@ -89,23 +50,29 @@ class Controller:
         self.v_previous = 41.6666
         self.v_pre_previous = 41.6666
         self.throttle_previous = 1.0
-        self.loopHelper = 1
 
         # Vehicle dynamics constants
         self.alphar = 0.0
         self.Calpha = 867
         self.a, self.b, self.c = 0.0, 0.0, 0.0
-        self.back = 10
 
         self.d = 4
         self.downforceCoeff = 0.965
-        # dragCoeff= 0.514
         self.dragCoeff = 0.51
         self.m = 630.0
         self.mu = 0.90
         self.rollingFriction = 100.0
         self.maxPower = 294000
         self.FintoV = self.maxPower
+
+        self.gear_efficiency = {
+            1: 0.91,
+            2: 0.91,
+            3: 0.91,
+            4: 0.96,
+            5: 0.96,
+            6: 0.96
+        }
 
     def getRadius(self, index, waypoints):
         self.a, self.b, self.c, dd, e, f = waypoints[index][0], waypoints[index][1], waypoints[index - 1][0], \
@@ -336,14 +303,10 @@ class Controller:
         self.x_previous = self.x
         self.y_previous = self.y
         self.v_req_previous = self.v_desired
-        k = i
         self.steeroutput_previous = self.steer_output
         self.throttleoutput_previous = self.throttle_output
-        # self.acceleration_previous = acceleration
-        dist = float("inf")
 
         self.steer_previous = self.fangle
         self.prev_diffangle = self.diffangle
-        self.runCount += 1
 
         return self.throttle_output, self.steer_output

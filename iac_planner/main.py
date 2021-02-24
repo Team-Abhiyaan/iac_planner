@@ -108,7 +108,7 @@ def load_rti(env, inputs):
         pass
     env.state[0] = state_in["cdgPos_x"]
     env.state[1] = state_in["cdgPos_y"]
-    env.state[2] = state_in["cdgSpeed_heading"]
+    env.state[2] = state_in["cdgPos_heading"]
     env.state[3] = np.sqrt(state_in["cdgSpeed_x"] ** 2 + state_in["cdgSpeed_y"] ** 2)
     env.gear = state_in["GearEngaged"]
 
@@ -173,7 +173,7 @@ def run(env: Env):
         # from iac_planner.collision_check import CollisionChecker
         # obs = CollisionChecker(env, 20, time_step=0.5).obstacles
         # plt.scatter(*zip(*obs), label='obstacles')
-        plt.scatter(*env.path[:20].T, label='global path')
+        plt.scatter(*env.path[:40].T, label='global path')
         plt.scatter(*best_trajectory[0].T, label='local path')
         plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]), head_width=5, label='vehicle')
         plt.legend()
@@ -185,13 +185,18 @@ def run(env: Env):
 def update_global_path(env: Env):
     def line_behind_vehicle(x: float, y: float) -> float:
         p: state_t = env.state
-        return (x - p[0]) * np.cos(p[2]) + (y - p[1]) * np.sin(p[2])
+        # yaw = p[2]
+        p0, p1 = env.path[0:2]
+        yaw = np.arctan2(p1[1] - p0[1], p1[0] - p0[0])
+        print('Yaw:'+str(yaw))
+        print('P[2]:'+str(p[2]))
+        return (x - p[0]) * np.cos(yaw) + (y - p[1]) * np.sin(yaw)
 
     def is_behind(x: float, y: float) -> bool:
         return line_behind_vehicle(x, y) < 0
 
     while is_behind(*env.path[0]):
-        # print('Passed a point in global path.')
+        print('Passed a point in global path.')
         env.path = env.path[1:, :]
 
 

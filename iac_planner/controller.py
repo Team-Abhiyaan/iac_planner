@@ -4,6 +4,15 @@ import math
 
 class Controller:
     def __init__(self):
+        self.gear_efficiency = {
+            1: 0.91,
+            2: 0.91,
+            3: 0.91,
+            4: 0.96,
+            5: 0.96,
+            6: 0.96
+        }
+
         self.distance = 0.0
         self.y_difference = 0.0
         self.x_difference = 0.0
@@ -131,24 +140,7 @@ class Controller:
         self.distance = np.sqrt(np.square(self.y_difference) + np.square(self.x_difference))
 
         ###########################################
-        gear = self.gear
-        if gear == 1:
-            gearEfficiency = 0.91
-
-        if gear == 2:
-            gearEfficiency = 0.91
-
-        if gear == 3:
-            gearEfficiency = 0.91
-
-        if gear == 4:
-            gearEfficiency = 0.96
-
-        if gear == 5:
-            gearEfficiency = 0.96
-
-        if gear == 6:
-            gearEfficiency = 0.96
+        gearEfficiency = self.gear_efficiency[self.gear]
 
         N = self.m * 9.81 * np.cos(self.theta[i]) + self.downforceCoeff * np.square(self.v)
         self.theta[i] = 0.0

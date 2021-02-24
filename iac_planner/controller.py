@@ -166,6 +166,15 @@ class Controller:
         # waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
         i = 1
 
+        # location_index = 0
+        # dist = float("inf")
+        # for j in range(len(waypoints)):
+        #     if dist >= np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0])):
+        #         dist = np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0]))
+        #         location_index = j
+        #
+        # i = location_index + 1
+
         print(env.state)
         for wpt in waypoints[:2]:
             print(wpt)
@@ -321,9 +330,9 @@ class Controller:
             self.fangled = np.arctan(
                 (waypoints[i + 1][1] - waypoints[i][1]) / (waypoints[i + 1][0] - waypoints[i][0])) + np.pi
 
-        self.k_1 = 0.008 * -5
+        self.k_1 = 0.3 * -5
         self.k_2 = 0.07 * -3
-        self.k_3 = 0.3 * -2.5
+        self.k_3 = 0.008 * -2.5
         self.k_4 = 0.60 * -1.5
 
         self.diff_1 = self.fangle - self.fanglea
@@ -421,19 +430,13 @@ class Controller:
         self.steeroutput_previous = self.steer_output
         self.throttleoutput_previous = self.throttle_output
         # self.acceleration_previous = acceleration
-        dist = float("inf")
 
-        '''
-        for j in range(len(waypoints)):
-            if dist >= np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0])):
-                if j>1000 and i<100:
-                    print('Waypoint Denied')
-                else:
-                    dist = np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0]))
-                    if j >= 1054:
-                        j = j-1054+39
-                    i = j + 2
-        '''
+        
+        # i = location_index
+        # i = i+1
+        # self.globalpathi = a_indy
+        # self.globalpathi = self.globalpathi + 1
+
         #a_indy = 0
         # self.lap = waypoints[i][3]
         # self.nozero = 0

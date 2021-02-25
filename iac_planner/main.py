@@ -170,12 +170,16 @@ def run(env: Env):
         import matplotlib.pyplot as plt
         plt.clf()
         plt.gca().set_aspect('equal', adjustable='box')
-        # from iac_planner.collision_check import CollisionChecker
-        # obs = CollisionChecker(env, 20, time_step=0.5).obstacles
-        # plt.scatter(*zip(*obs), label='obstacles')
+        from iac_planner.collision_check import CollisionChecker
+        obs = CollisionChecker(env, 20, time_step=0.5).obstacles
+        plt.scatter(*zip(*obs), label='obstacles')
         plt.scatter(*env.path[:40].T, label='global path')
         plt.scatter(*best_trajectory[0].T, label='local path')
         plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]), head_width=5, label='vehicle')
+        for state in env.other_vehicle_states:
+            plt.arrow(state[0], state[1], 20 * np.cos(state[2]), 20 * np.sin(state[2]), head_width=5,
+                      label='other')
+
         plt.legend()
         plt.pause(0.01)
 

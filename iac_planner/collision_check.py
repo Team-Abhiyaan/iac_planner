@@ -3,7 +3,7 @@ import scipy.spatial
 
 import math
 
-#from std_msgs.msg import ColorRGBA
+# from std_msgs.msg import ColorRGBA
 
 from iac_planner.generate_markers import visualize
 from iac_planner.helpers import Env, path_t, state_t
@@ -54,42 +54,40 @@ class CollisionChecker:
         # Find line perpendicular to the ego vehicles current heading
         # Find line with same slope but 5 meters ahead
         self.obstacles = []
-        l1 = Line_SI(math.tan(self._env.state[2]),
-                     self._env.state[1] - math.tan(self._env.state[2]) * self._env.state[0])
-        l2 = Line_SI(math.tan(self._env.state[2]),
-                     self._env.state[1] - math.tan(self._env.state[2]) * self._env.state[0] + math.sqrt(
-                         1 + math.tan(self._env.state[2]) ** 2) * 5)  # 5m is lookahead distance
-
-        # Find x co-ordinate of intersection of these lines
-        ll_x1 = intersection_line_cubic(l1, env.left_poly)[0]
-        ll_x2 = intersection_line_cubic(l2, env.left_poly)[0]
-        lr_x1 = intersection_line_cubic(l1, env.right_poly)[0]
-        lr_x2 = intersection_line_cubic(l2, env.right_poly)[0]
-
-        # Generate points on the lane boundries
-        x_l = np.linspace(ll_x1, ll_x2, 20)
-        x_r = np.linspace(lr_x1, lr_x2, 20)
 
         cl = [env.left_poly.c3, env.left_poly.c2, env.left_poly.c1, env.left_poly.c0][::-1]
         cr = [env.right_poly.c3, env.right_poly.c2, env.right_poly.c1, env.right_poly.c0][::-1]
 
-        y_l = np.array([polyeval(c, cl) for c in cl])
-        y_r = np.array([polyeval(c, cr) for c in cr])
+        # Generate points on the lane boundaries
+        # Lane boundary is in local frame
+        x0, y0 = 0, 0  # env.state[:2]
+        x_l = np.linspace(x0 - 20, x0 + 150, 20)
+        x_r = np.linspace(x0 - 20, x0 + 150, 20)
 
-        self.obstacles = list(zip(x_l, y_l)) + list(zip(x_r, y_r))
+        y_l = np.array([polyeval(c, cl) for c in x_l])
+        y_r = np.array([polyeval(c, cr) for c in x_r])
+        yaw = env.state[2]
+        x_ll, y_ll = x_l * np.cos(yaw) - y_l * np.sin(yaw), x_l * np.sin(yaw) + y_l * np.cos(yaw)
+        x_rr, y_rr = x_r * np.cos(yaw) - y_r * np.sin(yaw), x_r * np.sin(yaw) + y_r * np.cos(yaw)
+        x_ll += env.state[0]
+        x_rr += env.state[0]
+        y_ll += env.state[1]
+        y_rr += env.state[1]
+        self.obstacles = list(zip(x_ll, y_ll)) + list(zip(x_rr, y_rr))
+        print(f"OBSTACLE CHECKING: {len(self.obstacles)=}")
         self._obstacles = self.obstacles
 
-    # generate time steps for single path
+        # generate time steps for single path
+
     def generate_time_step(self, path, velocity_profile):
 
-        time_step = np.zeros((len(velocity_profile),), dtype = float)
+        time_step = np.zeros((len(velocity_profile),), dtype=float)
 
         for i in range(len(velocity_profile) - 1):
-            s = np.sqrt((path[i+1][0] - path[i][0])**2 + (path[i+1][1] - path[i][1])**2)
-            time_step[i+1] = (2*s)/(velocity_profile[i+1] + velocity_profile[i])
+            s = np.sqrt((path[i + 1][0] - path[i][0]) ** 2 + (path[i + 1][1] - path[i][1]) ** 2)
+            time_step[i + 1] = (2 * s) / (velocity_profile[i + 1] + velocity_profile[i])
 
         return time_step
-
 
     def generate_other_vehicle_paths(self, time_step, other_vehicle_states):
 
@@ -97,21 +95,22 @@ class CollisionChecker:
 
         for i in range(len(other_vehicle_paths)):
             vehicle_state = other_vehicle_states[i]
-            vehicle_path = np.zeros((3, len(time_step)), dtype = float)
+            vehicle_path = np.zeros((3, len(time_step)), dtype=float)
 
             vehicle_path[0][0] = vehicle_state[0]
             vehicle_path[1][0] = vehicle_state[1]
             vehicle_path[2][0] = vehicle_state[2]
 
             for j in range(1, len(time_step)):
-                vehicle_path[0][j] = vehicle_path[0][j-1] + time_step[j]*vehicle_state[3]*math.cos(vehicle_state[2])
-                vehicle_path[1][j] = vehicle_path[1][j-1] + time_step[j]*vehicle_state[3]*math.sin(vehicle_state[2])
+                vehicle_path[0][j] = vehicle_path[0][j - 1] + time_step[j] * vehicle_state[3] * math.cos(
+                    vehicle_state[2])
+                vehicle_path[1][j] = vehicle_path[1][j - 1] + time_step[j] * vehicle_state[3] * math.sin(
+                    vehicle_state[2])
                 vehicle_path[2][j] = vehicle_state[2]
 
             other_vehicle_paths[i] = vehicle_path
 
         return other_vehicle_paths
-
 
     def _static_collision_check(self, path: path_t):
         """Returns a bool array on whether each path is collision free.
@@ -235,7 +234,8 @@ class CollisionChecker:
                     self._other_vehicle_paths[k][2][j])
 
                 # calculating if any collisions occur
-                growth_factor = self._growth_factor_b + self._growth_factor_a * (self.other_vech_current_vel - self.other_vech_prev_vel)/self.other_vech_current_vel
+                growth_factor = self._growth_factor_b + self._growth_factor_a * (
+                        self.other_vech_current_vel - self.other_vech_prev_vel) / self.other_vech_current_vel
                 collision_dists = scipy.spatial.distance.cdist(other_circle_locations, ego_circle_locations)
                 collision_dists = np.subtract(collision_dists,
                                               self._circle_radii *

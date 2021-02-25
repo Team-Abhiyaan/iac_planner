@@ -99,7 +99,7 @@ class SplineGenerator(object):
             pose = Pose(p.x, p.y, yaw=self._ego_pose.yaw)
             yield cubic_spline(self._ego_pose, pose, pts_per_spline)
 
-    def generate_long(self, n: int, pts_per_spline: int, density: float = 1, bias: float = 0.5) -> PointGenerator:
+    def generate_long(self, n: int, pts_per_spline: int, delta_start: int = 8, skip: int = 2, bias: float = 0.6) -> PointGenerator:
         """Generate longitudinal splines.
 
         Args:
@@ -117,8 +117,9 @@ class SplineGenerator(object):
         # Use deques for constant time append and pop
         pts = deque()
 
+        idx = self._cls_pt - delta_start
         for i in range(n_rev):
-            idx = (self._cls_pt - i - 1) * density
+            idx -= skip
             if idx < 0:
                 msg = f'Not enough points; asked for {n_rev} backward paths, clipping to {len(pts)}'
                 _logger.warning(msg)
@@ -129,8 +130,9 @@ class SplineGenerator(object):
             slope = self._gp_handler.slopes[idx]
             pts.append((PVector(x, y), slope))
 
+        idx = self._cls_pt + delta_start
         for i in range(n_fwd):
-            idx = (self._cls_pt + i + 1) * density
+            idx += skip
             try:
                 x, y, *_ = self._gp_handler.global_path.loc[idx]
             except KeyError:

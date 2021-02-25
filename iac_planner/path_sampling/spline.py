@@ -99,7 +99,9 @@ class SplineGenerator(object):
             pose = Pose(p.x, p.y, yaw=self._ego_pose.yaw)
             yield cubic_spline(self._ego_pose, pose, pts_per_spline)
 
-    def generate_long(self, n: int, pts_per_spline: int, delta_start: int = 8, skip: int = 2, bias: float = 0.6) -> PointGenerator:
+    # Generate paths from current positions to the index range(delta_start, delta_start + n*skip, skip)
+    def generate_long(self, n: int, pts_per_spline: int, delta_start: int = 8, skip: int = 2,
+                      bias: float = 0.6) -> PointGenerator:
         """Generate longitudinal splines.
 
         Args:

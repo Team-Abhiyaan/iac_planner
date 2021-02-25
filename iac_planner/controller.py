@@ -22,7 +22,7 @@ class Controller:
         self.lap = 0
 
         self.i = 3
-        self.globalpathi = 3
+        self.globalpathi = 1
         # self.localpathi = 0
         self.j = 0
         self.k = 0
@@ -115,7 +115,7 @@ class Controller:
                     self.globalWaypoints[temp][1]), float(self.globalWaypoints[temp][2]), float(
                     self.globalWaypoints[temp][3])
                 temp += 1
-                print(temp)
+                # print(temp)
         return self.globalWaypoints
 
     def getRadius(self, index, waypoints=0, filename="5LapFinal85.csv"):
@@ -164,16 +164,49 @@ class Controller:
         for pt, vel in zip(*trajectory):
             waypoints.append([pt[0], pt[1], vel])
         # waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
+        distance = 0
+        waypoints_new = []
+        waypoints_new.append([waypoints[0][0], waypoints[0][1], waypoints[0][2]])
+        print(f"Length of path {((waypoints[-1][0]-waypoints[0][0])**2 + (waypoints[-1][1]-waypoints[0][1])**2)**0.5:.2f} / 24")
         i = 1
+        for i in range(1, len(waypoints)):
+            distance += np.sqrt((waypoints[i][0] - waypoints[i-1][0])**2 + (waypoints[i][1] - waypoints[i-1][1])**2)
+            if distance >= 4:
+                waypoints_new.append([waypoints[i][0], waypoints[i][1], waypoints[i][2]])
+                distance = 0
 
-        # location_index = 0
-        # dist = float("inf")
-        # for j in range(len(waypoints)):
-        #     if dist >= np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0])):
-        #         dist = np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0]))
-        #         location_index = j
-        #
-        # i = location_index + 1
+        # i = 4  # Look ahead distance (indices)
+        location_index = 0
+        if len(waypoints_new) >= 6:
+            print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC')
+            i = 1
+            waypoints = waypoints_new.copy()
+        elif len(waypoints) > 6:
+            print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
+            i = 1
+        else:
+            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+            waypoints = self.read_global_path_csv()
+            i = 1
+            dist = float("inf")
+            for j in range(self.globalpathi, self.globalpathi + 50):
+                if dist >= np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0])):
+                    dist = np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0]))
+                    location_index = j
+
+            i = location_index + 1
+
+        tempwaypoints = self.read_global_path_csv()
+        dist = float("inf")
+        for j in range(len(tempwaypoints)):
+            if dist >= np.sqrt(np.square(self.y - tempwaypoints[j][1]) + np.square(self.x - tempwaypoints[j][0])):
+                dist = np.sqrt(np.square(self.y - tempwaypoints[j][1]) + np.square(self.x - tempwaypoints[j][0]))
+                location_index = j
+        self.globalpathi = location_index
+        # print(waypoints[i+1])
+
+
+
 
         print(env.state)
         for wpt in waypoints[:2]:

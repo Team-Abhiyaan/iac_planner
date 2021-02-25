@@ -101,18 +101,19 @@ class SplineGenerator(object):
 
     # Generate paths from current positions to the index range(delta_start, delta_start + n*skip, skip)
     def generate_long(self, n: int, pts_per_spline: int, delta_start: int = 8, skip: int = 2,
-                      bias: float = 0.6) -> PointGenerator:
+                      bias: float = 1) -> PointGenerator:
         """Generate longitudinal splines.
 
         Args:
             n (int): Number of splines to generate
             density (int): Number of indices in the global path to skip between splines
-            bias (float): Percentage of splines to forward of obstacle
+            bias (float): Percentage of splines to generate in front of the vehicle
 
         Returns:
             PointGenerator: A generator that generates x and y coordinates of spline.
 
         """
+
         n_fwd = int(n * bias)
         n_rev = n - n_fwd
 
@@ -129,6 +130,7 @@ class SplineGenerator(object):
                 n_fwd += 1
                 continue
             x, y, *_ = self._gp_handler.global_path.loc[idx]
+            print(len(self._gp_handler.global_path))
             slope = self._gp_handler.slopes[idx]
             pts.append((PVector(x, y), slope))
 

@@ -74,7 +74,7 @@ class CollisionChecker:
         y_ll += env.state[1]
         y_rr += env.state[1]
         self.obstacles = list(zip(x_ll, y_ll)) + list(zip(x_rr, y_rr))
-        print(f"OBSTACLE CHECKING: {len(self.obstacles)=}")
+        # print(f"OBSTACLE CHECKING: {len(self.obstacles)=}")
         self._obstacles = self.obstacles
 
         # generate time steps for single path

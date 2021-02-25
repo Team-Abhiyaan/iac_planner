@@ -70,14 +70,36 @@ def main(args: Optional[Iterable[str]] = None):
                 # Remove passed points
                 # Note fails if robot and path have very different orientations, check for that
                 update_global_path(env)
-
+                use_global = False  # for plotting only
                 trajectory = None
                 trajectory = run(env)
                 if trajectory is None:
                     info("Warning: Could not get trajectory, falling back to global path.")
-                    trajectory = env.path[:18, :], generate_velocity_profile(env, env.path[:19, :])
+                    trajectory = env.path[:31, :], generate_velocity_profile(env, env.path[:32, :])
+                    use_global = True
 
                 throttle, steer = controller.run_controller_timestep(env, trajectory)
+
+                if env.plot_paths:
+                    import matplotlib.pyplot as plt
+                    plt.clf()
+                    plt.gca().set_aspect('equal', adjustable='box')
+                    from iac_planner.collision_check import CollisionChecker
+                    obs = CollisionChecker(env, 20, time_step=0.5).obstacles
+                    plt.scatter(*zip(*obs), label='obstacles', s=5)
+                    plt.scatter(*env.path[:40].T, label='global path', s=5)
+                    if trajectory is not None:
+                        plt.scatter(*trajectory[0].T, label=('local path' if use_global else 'fake local'), s=5)
+                    plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),
+                              head_width=5, label='vehicle')
+                    for state in env.other_vehicle_states:
+                        plt.arrow(state[0], state[1], 20 * np.cos(state[2]), 20 * np.sin(state[2]), head_width=5,
+                                  label='other')
+
+                    plt.xlim((env.state[0] - 75, env.state[0] + 75))
+                    plt.ylim((env.state[1] - 150, env.state[1] + 75))
+                    plt.legend()
+                    plt.pause(0.01)
 
                 vehicle_steer.instance.setNumber("AdditiveSteeringWheelAngle", steer)
                 vehicle_correct.instance.setNumber("AcceleratorAdditive", throttle)
@@ -166,23 +188,6 @@ def run(env: Env):
     else:
         info("ERROR: No trajectory found.")
 
-    if env.plot_paths:
-        import matplotlib.pyplot as plt
-        plt.clf()
-        plt.gca().set_aspect('equal', adjustable='box')
-        from iac_planner.collision_check import CollisionChecker
-        obs = CollisionChecker(env, 20, time_step=0.5).obstacles
-        plt.scatter(*zip(*obs), label='obstacles')
-        plt.scatter(*env.path[:40].T, label='global path')
-        plt.scatter(*best_trajectory[0].T, label='local path')
-        plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]), head_width=5, label='vehicle')
-        for state in env.other_vehicle_states:
-            plt.arrow(state[0], state[1], 20 * np.cos(state[2]), 20 * np.sin(state[2]), head_width=5,
-                      label='other')
-
-        plt.legend()
-        plt.pause(0.01)
-
     return best_trajectory
 
 
@@ -192,8 +197,6 @@ def update_global_path(env: Env):
         # yaw = p[2]
         p0, p1 = env.path[0:2]
         yaw = np.arctan2(p1[1] - p0[1], p1[0] - p0[0])
-        print('Yaw:'+str(yaw))
-        print('P[2]:'+str(p[2]))
         return (x - p[0]) * np.cos(yaw) + (y - p[1]) * np.sin(yaw)
 
     def is_behind(x: float, y: float) -> bool:

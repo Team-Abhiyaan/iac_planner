@@ -167,10 +167,11 @@ class Controller:
         distance = 0
         waypoints_new = []
         waypoints_new.append([waypoints[0][0], waypoints[0][1], waypoints[0][2]])
-        print(f"Length of path {((waypoints[-1][0]-waypoints[0][0])**2 + (waypoints[-1][1]-waypoints[0][1])**2)**0.5:.2f} / 24")
+        # print(f"Length of path {((waypoints[-1][0] - waypoints[0][0]) ** 2 + (waypoints[-1][1] - waypoints[0][1]) ** 2) ** 0.5:.2f} / 24")
         i = 1
         for i in range(1, len(waypoints)):
-            distance += np.sqrt((waypoints[i][0] - waypoints[i-1][0])**2 + (waypoints[i][1] - waypoints[i-1][1])**2)
+            distance += np.sqrt(
+                (waypoints[i][0] - waypoints[i - 1][0]) ** 2 + (waypoints[i][1] - waypoints[i - 1][1]) ** 2)
             if distance >= 4:
                 waypoints_new.append([waypoints[i][0], waypoints[i][1], waypoints[i][2]])
                 distance = 0
@@ -190,27 +191,26 @@ class Controller:
             i = 1
             dist = float("inf")
             for j in range(self.globalpathi, self.globalpathi + 50):
-                if dist >= np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0])):
-                    dist = np.sqrt(np.square(self.y-waypoints[j][1])+np.square(self.x-waypoints[j][0]))
+                if dist >= np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0])):
+                    dist = np.sqrt(np.square(self.y - waypoints[j][1]) + np.square(self.x - waypoints[j][0]))
                     location_index = j
 
             i = location_index + 1
 
         tempwaypoints = self.read_global_path_csv()
         dist = float("inf")
-        for j in range(len(tempwaypoints)):
+        for j in range(1, 1060):
             if dist >= np.sqrt(np.square(self.y - tempwaypoints[j][1]) + np.square(self.x - tempwaypoints[j][0])):
                 dist = np.sqrt(np.square(self.y - tempwaypoints[j][1]) + np.square(self.x - tempwaypoints[j][0]))
                 location_index = j
         self.globalpathi = location_index
         # print(waypoints[i+1])
 
+        print(f"{self.globalpathi=}")
 
-
-
-        print(env.state)
-        for wpt in waypoints[:2]:
-            print(wpt)
+        # print(env.state)
+        # for wpt in waypoints[:2]:
+        #     print(wpt)
 
         self.x, self.y, self.yaw, self.v = env.state
         self.gear = env.gear
@@ -278,7 +278,7 @@ class Controller:
 
             deltaUpper = min(deltaUpper1, deltaUpper2)
             deltaLower = deltaLower1
-            
+
             self.v_desired = min(waypoints[i + 1][2], self.v + deltaUpper)
 
             accel_desired = (waypoints[i + 2][2] * waypoints[i + 2][2] - waypoints[i + 1][2] * waypoints[i + 1][
@@ -464,13 +464,12 @@ class Controller:
         self.throttleoutput_previous = self.throttle_output
         # self.acceleration_previous = acceleration
 
-        
         # i = location_index
         # i = i+1
         # self.globalpathi = a_indy
         # self.globalpathi = self.globalpathi + 1
 
-        #a_indy = 0
+        # a_indy = 0
         # self.lap = waypoints[i][3]
         # self.nozero = 0
         # if self.lap == 0 and self.nozero == 0:
@@ -584,16 +583,15 @@ class Controller:
 
         # i = a_indy
         # i = i+1
-        #self.globalpathi = a_indy
-        #self.globalpathi = self.globalpathi + 1
-        #self.lap = waypoints[self.globalpathi][3]
+        # self.globalpathi = a_indy
+        # self.globalpathi = self.globalpathi + 1
+        # self.lap = waypoints[self.globalpathi][3]
 
-        #print("Index I")
-        #print(self.globalpathi)
+        # print("Index I")
+        # print(self.globalpathi)
         self.steer_previous = self.fangle
         self.prev_diffangle = self.diffangle
         self.runCount += 1
-
 
         return self.throttle_output, self.steer_output
 

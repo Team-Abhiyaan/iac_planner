@@ -160,22 +160,26 @@ class Controller:
     #     self.simDone.write()
 
     def run_controller_timestep(self, env, trajectory):  # trajectory: Tuple[path_t, List[float]]
-        waypoints = []
-        for pt, vel in zip(*trajectory):
-            waypoints.append([pt[0], pt[1], vel])
-        # waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
-        distance = 0
-        waypoints_new = []
-        waypoints_new.append([waypoints[0][0], waypoints[0][1], waypoints[0][2]])
-        # print(f"Length of path {((waypoints[-1][0] - waypoints[0][0]) ** 2 + (waypoints[-1][1] - waypoints[0][1]) ** 2) ** 0.5:.2f} / 24")
-        i = 1
-        for i in range(1, len(waypoints)):
-            distance += np.sqrt(
-                (waypoints[i][0] - waypoints[i - 1][0]) ** 2 + (waypoints[i][1] - waypoints[i - 1][1]) ** 2)
-            if distance >= 4:
-                waypoints_new.append([waypoints[i][0], waypoints[i][1], waypoints[i][2]])
-                distance = 0
-
+        if trajectory is not None:
+            waypoints = []
+            for pt, vel in zip(*trajectory):
+                waypoints.append([pt[0], pt[1], vel])
+            # waypoints = [(pt + [vel]) for pt, vel in zip(*trajectory)]
+            distance = 0
+            waypoints_new = []
+            waypoints_new.append([waypoints[0][0], waypoints[0][1], waypoints[0][2]])
+            # print(f"Length of path {((waypoints[-1][0] - waypoints[0][0]) ** 2 + (waypoints[-1][1] - waypoints[0][1]) ** 2) ** 0.5:.2f} / 24")
+            i = 1
+            for i in range(1, len(waypoints)):
+                distance += np.sqrt(
+                    (waypoints[i][0] - waypoints[i - 1][0]) ** 2 + (waypoints[i][1] - waypoints[i - 1][1]) ** 2)
+                if distance >= 4:
+                    waypoints_new.append([waypoints[i][0], waypoints[i][1], waypoints[i][2]])
+                    distance = 0
+        else:
+            # Trigger loading global path from csv
+            waypoints = []
+            waypoints_new = []
         # i = 4  # Look ahead distance (indices)
         location_index = 0
         if len(waypoints_new) >= 6:
@@ -186,6 +190,7 @@ class Controller:
             print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
             i = 1
         else:
+            # Load the Global Path from CSV
             print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
             waypoints = self.read_global_path_csv()
             i = 1
@@ -362,6 +367,7 @@ class Controller:
         else:
             self.fangled = np.arctan(
                 (waypoints[i + 1][1] - waypoints[i][1]) / (waypoints[i + 1][0] - waypoints[i][0])) + np.pi
+
 
         self.k_1 = 0.3 * -5
         self.k_2 = 0.07 * -3

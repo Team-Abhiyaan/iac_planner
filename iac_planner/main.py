@@ -89,7 +89,7 @@ def main(args: Optional[Iterable[str]] = None):
                     plt.scatter(*zip(*obs), label='obstacles', s=5)
                     plt.scatter(*env.path[:40].T, label='global path', s=5)
                     if trajectory is not None:
-                        plt.scatter(*trajectory[0].T, label=('local path' if use_global else 'fake local'), s=5)
+                        plt.scatter(*trajectory[0].T, label=('local path' if not use_global else 'fake local'), s=5)
                     plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),
                               head_width=5, label='vehicle')
                     for state in env.other_vehicle_states:

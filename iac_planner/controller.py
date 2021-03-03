@@ -173,7 +173,7 @@ class Controller:
             for i in range(1, len(waypoints)):
                 distance += np.sqrt(
                     (waypoints[i][0] - waypoints[i - 1][0]) ** 2 + (waypoints[i][1] - waypoints[i - 1][1]) ** 2)
-                if distance >= 4:
+                if distance >= 6:
                     waypoints_new.append([waypoints[i][0], waypoints[i][1], waypoints[i][2]])
                     distance = 0
         else:
@@ -184,6 +184,7 @@ class Controller:
         location_index = 0
         if len(waypoints_new) >= 6:
             print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC')
+            print(len(waypoints_new))
             i = 1
             waypoints = waypoints_new.copy()
         elif len(waypoints) > 6:
@@ -328,31 +329,31 @@ class Controller:
         else:
             self.fanglea = np.arctan((waypoints[i + 2][1] - self.y) / (waypoints[i + 2][0] - self.x)) + np.pi
 
-        if (waypoints[i + 4][0] - self.x > 0):
-            self.fangleb = np.arctan((waypoints[i + 4][1] - self.y) / (waypoints[i + 4][0] - self.x))
-        elif (waypoints[i + 4][0] - self.x == 0):
-            if (waypoints[i + 4][1] - self.y > 0):
+        if (waypoints[i + 5][0] - self.x > 0):
+            self.fangleb = np.arctan((waypoints[i + 5][1] - self.y) / (waypoints[i + 5][0] - self.x))
+        elif (waypoints[i + 5][0] - self.x == 0):
+            if (waypoints[i + 5][1] - self.y > 0):
                 self.fangleb = np.pi / 2
-            elif (waypoints[i + 4][1] - self.y < 0):
+            elif (waypoints[i + 5][1] - self.y < 0):
                 self.fangleb = -np.pi / 2
             else:
                 self.fangleb = 0
         else:
-            self.fangleb = np.arctan((waypoints[i + 4][1] - self.y) / (waypoints[i + 4][0] - self.x)) + np.pi
+            self.fangleb = np.arctan((waypoints[i + 5][1] - self.y) / (waypoints[i + 5][0] - self.x)) + np.pi
 
-        if (waypoints[i + 5][0] - waypoints[i + 4][0] > 0):
+        if (waypoints[i + 4][0] - waypoints[i + 3][0] > 0):
             self.fanglec = np.arctan(
-                (waypoints[i + 5][1] - waypoints[i + 4][1]) / (waypoints[i + 5][0] - waypoints[i + 4][0]))
-        elif (waypoints[i + 5][0] - waypoints[i + 4][0] == 0):
-            if (waypoints[i + 5][1] - waypoints[i + 4][1] > 0):
+                (waypoints[i + 4][1] - waypoints[i + 3][1]) / (waypoints[i + 4][0] - waypoints[i + 3][0]))
+        elif (waypoints[i + 4][0] - waypoints[i + 3][0] == 0):
+            if (waypoints[i + 4][1] - waypoints[i + 3][1] > 0):
                 self.fanglec = np.pi / 2
-            elif (waypoints[i + 5][1] - waypoints[i + 4][1] < 0):
+            elif (waypoints[i + 4][1] - waypoints[i + 3][1] < 0):
                 self.fanglec = -np.pi / 2
             else:
                 self.fanglec = 0
         else:
-            self.fanglec = np.arctan((waypoints[i + 5][1] - waypoints[i + 4][1]) / (
-                    waypoints[i + 5][0] - waypoints[i + 4][0])) + np.pi
+            self.fanglec = np.arctan((waypoints[i + 4][1] - waypoints[i + 3][1]) / (
+                    waypoints[i + 4][0] - waypoints[i + 3][0])) + np.pi
 
         if (waypoints[i + 1][0] - waypoints[i][0] > 0):
             self.fangled = np.arctan(
@@ -370,8 +371,8 @@ class Controller:
 
 
         self.k_1 = 0.3 * -5
-        self.k_2 = 0.07 * -3
-        self.k_3 = 0.008 * -2.5
+        self.k_2 = 0.04 * -3
+        self.k_3 = 0.08 * -4
         self.k_4 = 0.60 * -1.5
 
         self.diff_1 = self.fangle - self.fanglea
@@ -408,14 +409,14 @@ class Controller:
                 self.m * 9.81 * math.sin((self.theta[i] + self.theta[i + 1]) / 2) + self.mu * N)
 
         if self.steer_output > 0:
-            self.steer_output = np.minimum(
-                minR * minR * 1.9 * 9.81 * self.Calpha / (self.L * 630 * tempVelo) + 630 * tempVelo / (
-                        1.9 * 9.81 * minR * self.Calpha), self.steer_output)
+           self.steer_output = np.minimum(
+               minR * minR * 1.9 * 9.81 * self.Calpha / (self.L * 630 * tempVelo) + 630 * tempVelo / (
+                       1.9 * 9.81 * minR * self.Calpha), self.steer_output)
 
         if self.steer_output < 0:
-            self.steer_output = np.maximum(
-                -minR * minR * 1.9 * 9.81 * self.Calpha / (self.L * 630 * tempVelo) - 630 * tempVelo / (
-                        1.9 * 9.81 * minR * self.Calpha), self.steer_output)
+           self.steer_output = np.maximum(
+               -minR * minR * 1.9 * 9.81 * self.Calpha / (self.L * 630 * tempVelo) - 630 * tempVelo / (
+                       1.9 * 9.81 * minR * self.Calpha), self.steer_output)
 
         # self.alphar= (630/1.9)*tempVelo/(9.81*R*self.Calpha)
         if (self.steer_output >= 1):

@@ -85,8 +85,10 @@ def main(args: Optional[Iterable[str]] = None):
                     plt.clf()
                     plt.gca().set_aspect('equal', adjustable='box')
                     from iac_planner.collision_check import CollisionChecker
+            
                     obs = CollisionChecker(env, 20, time_step=0.5).obstacles
-                    plt.scatter(*zip(*obs), label='obstacles', s=5)
+                    if len(obs)!=0:
+                        plt.scatter(*zip(*obs), label='obstacles', s=5)
                     plt.scatter(*env.path[:40].T, label='global path', s=5)
                     if trajectory is not None:
                         plt.scatter(*trajectory[0].T, label=('local path' if not use_global else 'fake local'), s=5)
@@ -142,12 +144,17 @@ def load_rti(env, inputs):
     for track_poly in track_polys.samples.valid_data_iter:
         pass
     roadlinepolyarray = track_poly['roadLinesPolynomsArray']
-    left_array = roadlinepolyarray[0]
-    right_array = roadlinepolyarray[1]
-    env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
+    #print(roadlinepolyarray)
+    if len(roadlinepolyarray) >= 2:
+        left_array = roadlinepolyarray[0]
+    
+        right_array = roadlinepolyarray[1]
+        env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
                                     left_array['c3'])
-    env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
+        env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
                                      right_array['c3'])
+    else:
+        print("ERROR: didn't get data")
 
     # TODO: Load dynamic vehicles
     other_vehicle_states = inputs.other_vehicle_states

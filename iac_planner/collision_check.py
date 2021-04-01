@@ -54,28 +54,32 @@ class CollisionChecker:
         # Find line perpendicular to the ego vehicles current heading
         # Find line with same slope but 5 meters ahead
         self.obstacles = []
+        if env.left_poly is not None and env.right_poly is not None:
 
-        cl = [env.left_poly.c3, env.left_poly.c2, env.left_poly.c1, env.left_poly.c0][::-1]
-        cr = [env.right_poly.c3, env.right_poly.c2, env.right_poly.c1, env.right_poly.c0][::-1]
+            cl = [env.left_poly.c3, env.left_poly.c2, env.left_poly.c1, env.left_poly.c0][::-1]
+            cr = [env.right_poly.c3, env.right_poly.c2, env.right_poly.c1, env.right_poly.c0][::-1]
 
-        # Generate points on the lane boundaries
-        # Lane boundary is in local frame
-        x0, y0 = 0, 0  # env.state[:2]
-        x_l = np.linspace(x0 - 20, x0 + 150, 20)
-        x_r = np.linspace(x0 - 20, x0 + 150, 20)
+            # Generate points on the lane boundaries
+            # Lane boundary is in local frame
+            x0, y0 = 0, 0  # env.state[:2]
+            x_l = np.linspace(x0 - 20, x0 + 150, 20)
+            x_r = np.linspace(x0 - 20, x0 + 150, 20)
 
-        y_l = np.array([polyeval(c, cl) for c in x_l])
-        y_r = np.array([polyeval(c, cr) for c in x_r])
-        yaw = env.state[2]
-        x_ll, y_ll = x_l * np.cos(yaw) - y_l * np.sin(yaw), x_l * np.sin(yaw) + y_l * np.cos(yaw)
-        x_rr, y_rr = x_r * np.cos(yaw) - y_r * np.sin(yaw), x_r * np.sin(yaw) + y_r * np.cos(yaw)
-        x_ll += env.state[0]
-        x_rr += env.state[0]
-        y_ll += env.state[1]
-        y_rr += env.state[1]
-        self.obstacles = list(zip(x_ll, y_ll)) + list(zip(x_rr, y_rr))
-        # print(f"OBSTACLE CHECKING: {len(self.obstacles)=}")
-        self._obstacles = self.obstacles
+            y_l = np.array([polyeval(c, cl) for c in x_l])
+            y_r = np.array([polyeval(c, cr) for c in x_r])
+            yaw = env.state[2]
+            x_ll, y_ll = x_l * np.cos(yaw) - y_l * np.sin(yaw), x_l * np.sin(yaw) + y_l * np.cos(yaw)
+            x_rr, y_rr = x_r * np.cos(yaw) - y_r * np.sin(yaw), x_r * np.sin(yaw) + y_r * np.cos(yaw)
+            x_ll += env.state[0]
+            x_rr += env.state[0]
+            y_ll += env.state[1]
+            y_rr += env.state[1]
+            self.obstacles = list(zip(x_ll, y_ll)) + list(zip(x_rr, y_rr))
+            # print(f"OBSTACLE CHECKING: {len(self.obstacles)=}")
+            self._obstacles = self.obstacles
+
+        else:
+            self._obstacles = []
 
         # generate time steps for single path
 

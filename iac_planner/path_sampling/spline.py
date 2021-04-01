@@ -52,10 +52,7 @@ class SplineGenerator(object):
         self._ppd_line = self._gp_handler.get_perpendicular(self._cls_pt, 0)
 
         # Tuple containing points of intersection of perpendicular with track, left and right resp.
-        self._lat_lims = (
-            intersection_line_cubic(self._ppd_line, self._coeffs_left),
-            intersection_line_cubic(self._ppd_line, self._coeffs_right)
-        )
+        
 
     def generate_lat(self, n: int, pts_per_spline: int, padding: float = 0.04, bias: float = 0.5) -> PointGenerator:
         """Generate lateral splines.
@@ -70,6 +67,10 @@ class SplineGenerator(object):
             PointGenerator: A generator that generates x and y coordinates of spline.
 
         """
+        self._lat_lims = (
+            intersection_line_cubic(self._ppd_line, self._coeffs_left),
+            intersection_line_cubic(self._ppd_line, self._coeffs_right)
+        )
         padding = np.clip(padding, 0, 0.25)
         bias = np.clip(bias, 0, 1)
 

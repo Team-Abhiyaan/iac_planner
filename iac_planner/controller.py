@@ -103,7 +103,7 @@ class Controller:
         self.maxPower = 294000
         self.FintoV = self.maxPower
 
-    def read_global_path_csv(self, filename="5LapFinal85.csv"):
+    def read_global_path_csv(self, filename="C:\\Users\\IndyAdmin\\Desktop\\iac_planner-real\\resources\\5LapFinal85.csv"):
         with open(filename, 'r') as csvfile:
             reader = csv.reader(csvfile)
             temp = 0

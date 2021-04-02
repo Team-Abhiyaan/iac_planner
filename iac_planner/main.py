@@ -144,7 +144,6 @@ def load_rti(env, inputs):
     for track_poly in track_polys.samples.valid_data_iter:
         pass
     roadlinepolyarray = track_poly['roadLinesPolynomsArray']
-    #print(roadlinepolyarray)
     if len(roadlinepolyarray) >= 2:
         left_array = roadlinepolyarray[0]
     
@@ -165,7 +164,7 @@ def load_rti(env, inputs):
     for other_vehicles in other_vehicle_states.samples.valid_data_iter:
         pass
     targetsArray = other_vehicles['targetsArray']
-    print(len(targetsArray))
+    print(f"{len(targetsArray)} other vehicles")
     for other_vehicle in targetsArray:
         x = other_vehicle['posXInChosenRef']
         y = other_vehicle['posYInChosenRef']

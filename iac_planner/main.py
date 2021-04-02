@@ -65,7 +65,7 @@ def main(args: Optional[Iterable[str]] = None):
 
             while True:
                 load_rti(env, inputs)
-                info('Got RTI inputs')
+                # info('Got RTI inputs')
 
                 # Remove passed points
                 # Note fails if robot and path have very different orientations, check for that
@@ -124,7 +124,7 @@ def load_rti(env, inputs):
     env.info('Got sim wait')
     inputs.vehicle_state.wait()
     inputs.vehicle_state.take()
-    env.info('Got state')
+    # env.info('Got state')
 
     # read values to env
     state_in = None

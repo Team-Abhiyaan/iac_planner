@@ -447,19 +447,11 @@ class Controller:
         #    loopHelper+=1
 
         print('-------------Controller Error----------------')
-        print(f"v: {self.v - self.v_desired:.2f}\t x: {self.x_difference:.2f}\t y: {self.y_difference:.2f}")
+        print(f"v: {self.v -  min(waypoints[0][2], self.v + deltaUpper):.2f}\t x: {self.x_difference:.2f}\t y: {self.y_difference:.2f}")
         print('------------Controller Outputs---------------')
         print(f"throttle: {self.throttle_output:.2f}\t brake: {self.brake_output:.2f}\t steer: {self.steer_output:.2f}")
         print('---------------------------------------------')
 
-        # print('Control State Values')
-        # print('--------Throttle-----------')
-        # print(self.throttle_output)
-        # print('---------Brake----------')
-        # print(self.brake_output)
-        # print('--------Steer-----------')
-        # print(self.steer_output)
-        # print('-------------------')
 
         self.v_pre_previous = self.v_previous
         self.v_previous = self.v
@@ -469,6 +461,8 @@ class Controller:
         k = i
         self.steeroutput_previous = self.steer_output
         self.throttleoutput_previous = self.throttle_output
+
+        """
         # self.acceleration_previous = acceleration
 
         # i = location_index
@@ -596,6 +590,8 @@ class Controller:
 
         # print("Index I")
         # print(self.globalpathi)
+        """
+
         self.steer_previous = self.fangle
         self.prev_diffangle = self.diffangle
         self.runCount += 1

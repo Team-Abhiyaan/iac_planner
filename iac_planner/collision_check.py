@@ -116,6 +116,35 @@ class CollisionChecker:
 
         return other_vehicle_paths
 
+    def _lanes_collision_check(self, path:path_t):
+        if self._env.left_poly is None or self._env.right_poly is None:
+            print("NO POLY!!!")
+            return True
+
+        if len(path) == 0:
+            assert (False, "Empty Path") 
+
+        # Transform path to local frame
+        env = self._env
+        yaw = env.state[2]
+        pos_cur = np.array([env.state[0], env.state[1]]).reshape((1,2))
+        rot_matrix =  np.array([
+            [  np.cos(-yaw),  np.sin(-yaw)], 
+            [ -np.sin(-yaw),  np.cos(-yaw)]]
+        )
+        p_trans = (path - pos_cur) @ rot_matrix
+
+        # Check for outside lane
+        for pt in p_trans:
+            if (polyeval(pt[0], self._env.left_poly)-pt[1]) * (polyeval(pt[0], self._env.right_poly)-pt[1]) > 0:
+                return False
+        
+        return True
+
+        # Somehow add a buffer to the lane borders???
+
+
+
     def _static_collision_check(self, path: path_t):
         """Returns a bool array on whether each path is collision free.
         args:
@@ -145,6 +174,9 @@ class CollisionChecker:
 
         if len(path) == 0:
             assert (False, "Empty Path")
+
+        if not self._lanes_collision_check(path):
+            return False
 
         # Iterate over the points in the path.
         for (i, pt) in enumerate(path):

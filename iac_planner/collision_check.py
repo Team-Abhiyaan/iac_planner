@@ -62,8 +62,8 @@ class CollisionChecker:
             # Generate points on the lane boundaries
             # Lane boundary is in local frame
             x0, y0 = 0, 0  # env.state[:2]
-            x_l = np.linspace(x0 - 20, x0 + 150, 20)
-            x_r = np.linspace(x0 - 20, x0 + 150, 20)
+            x_l = np.linspace(x0 - 20, x0 + 150, 40)
+            x_r = np.linspace(x0 - 20, x0 + 150, 40)
 
             y_l = np.array([polyeval(c, cl) for c in x_l])
             y_r = np.array([polyeval(c, cr) for c in x_r])

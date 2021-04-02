@@ -35,7 +35,7 @@ class VelParams:
 @dataclass
 class CollisionParams:
     circle_offset = 0
-    circle_radii = 1
+    circle_radii = 0.75
     growth_factor_a = 0
     growth_factor_b = 0
 

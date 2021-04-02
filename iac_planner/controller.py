@@ -183,16 +183,16 @@ class Controller:
         # i = 4  # Look ahead distance (indices)
         location_index = 0
         if len(waypoints_new) >= 6:
-            print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC')
-            print(len(waypoints_new))
+            # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC')
+            # print(len(waypoints_new))
             i = 1
             waypoints = waypoints_new.copy()
         elif len(waypoints) > 6:
-            print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
+            print('waypoints <= 6 BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
             i = 1
         else:
             # Load the Global Path from CSV
-            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+            print('WARN: USE Global path  in controller AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
             waypoints = self.read_global_path_csv()
             i = 1
             dist = float("inf")
@@ -212,7 +212,7 @@ class Controller:
         self.globalpathi = location_index
         # print(waypoints[i+1])
 
-        print(f"{self.globalpathi=}")
+        # print(f"{self.globalpathi=}")
 
         # print(env.state)
         # for wpt in waypoints[:2]:

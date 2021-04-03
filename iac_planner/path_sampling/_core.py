@@ -213,7 +213,7 @@ def cubic_spline(pose1: Pose, pose2: Pose, n: int) -> Tuple[np.ndarray, np.ndarr
     This gives us a linear matrix eqn AX = B with coefficient matrix as unknown
 
     """
-    return cubic_spline_opt(pose1, pose2, n)
+    # return cubic_spline_opt(pose1, pose2, n) # Use spline generation from direct algebra (no matrix operations)
 
     # Translation
     shift_x = pose2.x - pose1.x

@@ -18,6 +18,19 @@ from iac_planner.path_sampling.types import RoadLinePolynom
 from iac_planner.score_paths import score_paths
 
 # TODO: update this
+EGO = 1
+
+
+def get_xml_url(ego: int) -> str:
+    if ego == 2:
+        return "./resources/RtiSCADE_DS_Controller_ego2.xml"
+    elif ego == 1:
+        return "./resources/RtiSCADE_DS_Controller_ego1.xml"
+    else:
+        raise Exception("Invalid EGO number")
+
+
+# DS_CONTROLLER_EGO_XML = "./resources/RtiSCADE_DS_Controller_ego1.xml"
 GLOBAL_PATH_CSV_FILE = "./resources/velocityProfileMu85.csv"
 
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +42,11 @@ def main(args: Optional[Iterable[str]] = None):
     info: Callable[[str], None] = _logger.info
     env.info = info
 
+    EGO = 1
+    if args is not None and len(args) >= 2 and args[1].strip() == '2':
+        EGO = 2
+    print(f"Using ego {EGO}")
+
     info("Starting up...")
 
     env.global_path_handler.load_from_csv(GLOBAL_PATH_CSV_FILE)
@@ -39,7 +57,7 @@ def main(args: Optional[Iterable[str]] = None):
 
     try:
         with rti.open_connector(config_name="SCADE_DS_Controller::Controller",
-                                url="resources/RtiSCADE_DS_Controller_ego1.xml") as connector:
+                                url=get_xml_url(EGO)) as connector:
             info('Opened RTI Connector')
 
             # Readers
@@ -83,20 +101,21 @@ def main(args: Optional[Iterable[str]] = None):
                 if env.plot_paths:
                     import matplotlib.pyplot as plt
                     plt.clf()
+                    plt.title(f"EGO {EGO}")
                     plt.gca().set_aspect('equal', adjustable='box')
                     from iac_planner.collision_check import CollisionChecker
-            
+
                     obs = CollisionChecker(env, 20, time_step=0.5).obstacles
-                    if len(obs)!=0:
+                    if len(obs) != 0:
                         plt.scatter(*zip(*obs), label='obstacles', s=5)
                     plt.scatter(*env.path[:40].T, label='global path', s=5)
                     if trajectory is not None:
                         plt.scatter(*trajectory[0].T, label=('local path' if not use_global else 'fake local'), s=5)
                     plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),
                               head_width=5, label='vehicle')
-                    for state in env.other_vehicle_states:
-                        plt.arrow(state[0], state[1], 20 * np.cos(state[2]), 20 * np.sin(state[2]), head_width=5,
-                                  label='other')
+                    for i, state in enumerate(env.other_vehicle_states):
+                        plt.arrow(state[0] + env.state[0], state[1] + env.state[1], 20 * np.cos(state[2] + env.state[2]), 20 * np.sin(state[2] + env.state[2]), head_width=5,
+                                  label=f"other {i}", color='red')
 
                     plt.xlim((env.state[0] - 75, env.state[0] + 75))
                     plt.ylim((env.state[1] - 150, env.state[1] + 75))
@@ -146,7 +165,7 @@ def load_rti(env, inputs):
     roadlinepolyarray = track_poly['roadLinesPolynomsArray']
     if len(roadlinepolyarray) >= 2:
         left_array = roadlinepolyarray[0]
-    
+
         right_array = roadlinepolyarray[1]
         env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
                                     left_array['c3'])

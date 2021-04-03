@@ -105,17 +105,25 @@ def main(args: Optional[Iterable[str]] = None):
                     plt.gca().set_aspect('equal', adjustable='box')
                     from iac_planner.collision_check import CollisionChecker
 
-                    obs = CollisionChecker(env, 20, time_step=0.5).obstacles
-                    if len(obs) != 0:
-                        plt.scatter(*zip(*obs), label='obstacles', s=5)
+                    cc = CollisionChecker(env, 20, time_step=0.5)
+                    cc.init_other_paths(trajectory[0])
+
+                    if len(cc.obstacles) != 0:
+                        plt.scatter(*zip(*cc.obstacles), label='obstacles', s=5)
                     plt.scatter(*env.path[:40].T, label='global path', s=5)
                     if trajectory is not None:
                         plt.scatter(*trajectory[0].T, label=('local path' if not use_global else 'fake local'), s=5)
                     plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),
                               head_width=5, label='vehicle')
                     for i, state in enumerate(env.other_vehicle_states):
-                        plt.arrow(state[0] + env.state[0], state[1] + env.state[1], 20 * np.cos(state[2] + env.state[2]), 20 * np.sin(state[2] + env.state[2]), head_width=5,
-                                  label=f"other {i}", color='red')
+                        plt.arrow(state[0] + env.state[0], state[1] + env.state[1],
+                                  20 * np.cos(state[2] + env.state[2]), 20 * np.sin(state[2] + env.state[2]),
+                                  head_width=5,
+                                  label=f"other {i+1}", color='red')
+
+                    for i, path in enumerate(cc._other_vehicle_paths):
+                        print(path)
+                        plt.scatter(*path[:2], s=5,label=f"path {i+1}", color='red')
 
                     plt.xlim((env.state[0] - 75, env.state[0] + 75))
                     plt.ylim((env.state[1] - 150, env.state[1] + 75))

@@ -94,7 +94,6 @@ class CollisionChecker:
         return time_step
 
     def generate_other_vehicle_paths(self, time_step, other_vehicle_states):
-
         other_vehicle_paths = np.zeros((len(other_vehicle_states), 3, len(time_step)), dtype=float)
 
         for i in range(len(other_vehicle_paths)):
@@ -237,10 +236,8 @@ class CollisionChecker:
                     ith index in the collision_check_array list corresponds to the
                     ith path in the paths list.
         """
-        velocity_profile = generate_velocity_profile(self._env, path)
-        self._time_step = self.generate_time_step(path, velocity_profile)
+        self.init_other_paths(path)
         global other_vehicle_states
-        self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_step, other_vehicle_states)
 
         if len(self._other_vehicle_paths) == 0:
             return True
@@ -282,6 +279,12 @@ class CollisionChecker:
 
         self.other_vech_prev_vel = self.other_vech_current_vel
         return True
+
+    def init_other_paths(self, path):
+        velocity_profile = generate_velocity_profile(self._env, path)
+        self._time_step = self.generate_time_step(path, velocity_profile)
+        global other_vehicle_states
+        self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_step, other_vehicle_states)
 
     def check_collisions(self, path: path_t):
         return self._static_collision_check(path) and self._dynamic_collision_check(path)

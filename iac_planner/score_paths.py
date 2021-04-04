@@ -24,6 +24,7 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
         cost = 0.0
         costs = np.zeros(len(path))  # store individual costs for visualization
 
+        # ~ 300 ms total
         vel_profile = generate_velocity_profile(env, path)
 
         if not collision_checker.check_collisions(path):
@@ -33,6 +34,7 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
         global_path_index = 0  # The closes segment to the current point on the candidate path
         distance_func = get_distance_func(env.path, global_path_index)  # To get distance of point from nearest segment
 
+        # ~ 50 ms total
         for j in range(len(path)):
             pt = path[j]
 
@@ -55,9 +57,6 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
                 costs[j] += env.weights.slope * np.abs(slope(path, j) - slope(env.path, global_path_index))
 
             cost += costs[j]
-
-        # Visualize
-        # visualize(env.m_pub, env.nh.get_clock(), index, path, weights=costs, weight_max=3)
 
         if cost < best_cost:
             best_trajectory = path, vel_profile

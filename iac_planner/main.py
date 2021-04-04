@@ -108,6 +108,7 @@ def main(args: Optional[Iterable[str]] = None):
 
                 if env.plot_paths:  # ~ 200ms
                     import matplotlib.pyplot as plt
+                    print(env.other_vehicle_states)
                     plt.clf()
                     plt.title(f"EGO {EGO}")
                     plt.gca().set_aspect('equal', adjustable='box')
@@ -124,13 +125,12 @@ def main(args: Optional[Iterable[str]] = None):
                     plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),
                               head_width=5, label='vehicle')
                     for i, state in enumerate(env.other_vehicle_states):
-                        plt.arrow(state[0] + env.state[0], state[1] + env.state[1],
-                                  20 * np.cos(state[2] + env.state[2]), 20 * np.sin(state[2] + env.state[2]),
+                        plt.arrow(state[0], state[1],
+                                  20 * np.cos(state[2]), 20 * np.sin(state[2]),
                                   head_width=5,
-                                  label=f"other {i+1}", color='red')
+                                  label=f"other {i + 1}", color='red')
 
                     for i, path in enumerate(cc._other_vehicle_paths):
-                        print(path)
                         plt.scatter(*path[:2], s=5,label=f"path {i+1}", color='red')
 
                     plt.xlim((env.state[0] - 75, env.state[0] + 75))
@@ -205,7 +205,11 @@ def load_rti(env, inputs):
         y = other_vehicle['posYInChosenRef']
         yaw = other_vehicle['posHeadingInChosenRef']
         v = other_vehicle['absoluteSpeedX']
-        env.other_vehicle_states.append(np.array([x, y, yaw, v]))
+        eyaw = env.state[2]
+        xx, yy = x * np.cos(eyaw) - y * np.sin(eyaw), x * np.sin(eyaw) + y * np.cos(eyaw)
+        xx += env.state[0]
+        yy += env.state[1]
+        env.other_vehicle_states.append(np.array([x+env.state[0], y+env.state[1], yaw+env.state[2], v]))
 
 
 def run(env: Env):

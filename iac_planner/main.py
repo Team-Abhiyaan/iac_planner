@@ -47,6 +47,8 @@ def main(args: Optional[Iterable[str]] = None):
     if args is not None and len(args) >= 2 and args[1].strip() == '2':
         EGO = 2
     print(f"Using ego {EGO}")
+    if args is not None and len(args) >= 3 and args[2].strip() == '--no-plot':
+        env.plot_paths = False
 
     info("Starting up...")
 

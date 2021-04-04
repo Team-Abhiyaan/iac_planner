@@ -3,6 +3,7 @@
 Visualizes the CTE of some simple paths using rviz2
 """
 import sys
+import time
 from typing import Optional, Iterable, Callable
 import logging
 
@@ -84,21 +85,26 @@ def main(args: Optional[Iterable[str]] = None):
             while True:
                 load_rti(env, inputs)
                 # info('Got RTI inputs')
-
+                t_start = time.time()
                 # Remove passed points
                 # Note fails if robot and path have very different orientations, check for that
                 update_global_path(env)
                 use_global = False  # for plotting only
-                trajectory = None
+
+                # ~ 3300 ms
                 trajectory = run(env)
                 if trajectory is None:
                     info("Warning: Could not get trajectory, falling back to global path.")
                     trajectory = env.path[:31, :], generate_velocity_profile(env, env.path[:32, :])
                     use_global = True
 
+                # ~ 30 ms
                 throttle, steer = controller.run_controller_timestep(env, trajectory)
 
-                if env.plot_paths:
+                t_logic = time.time()
+                print(f"time: {(t_logic-t_start):.3f}")
+
+                if env.plot_paths:  # ~ 200ms
                     import matplotlib.pyplot as plt
                     plt.clf()
                     plt.title(f"EGO {EGO}")
@@ -128,7 +134,7 @@ def main(args: Optional[Iterable[str]] = None):
                     plt.xlim((env.state[0] - 75, env.state[0] + 75))
                     plt.ylim((env.state[1] - 150, env.state[1] + 75))
                     plt.legend()
-                    plt.pause(0.01)
+                    plt.pause(0.005)
 
                 vehicle_steer.instance.setNumber("AdditiveSteeringWheelAngle", steer)
                 vehicle_correct.instance.setNumber("AcceleratorAdditive", throttle)

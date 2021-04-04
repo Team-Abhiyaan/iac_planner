@@ -243,6 +243,9 @@ def update_global_path(env: Env):
     def is_behind(x: float, y: float) -> bool:
         return line_behind_vehicle(x, y) < 0
 
+    if line_behind_vehicle(*env.path[0]) < -4:
+        return update_global_path_by_dist(env)
+
     while is_behind(*env.path[0]):
         print('Passed a point in global path.')
         env.path = env.path[1:, :]
@@ -251,7 +254,7 @@ def update_global_path(env: Env):
 def update_global_path_by_dist(env: Env):
     def is_close(x: float, y: float) -> bool:
         xe, ye = env.state[:2]
-        return (x-xe)**2 + (y-ye)**2 < 2**2
+        return (x-xe)**2 + (y-ye)**2 <= 4**2
 
     i = 0
     while not is_close(*env.path[i]):
@@ -260,7 +263,7 @@ def update_global_path_by_dist(env: Env):
         if i + 10 > len(env.path):
             print("ERROR: No point in global path is close enough")
             return
-    print(f"Skipped {i} points in global path.")
+    print(f"Skipped {i} points in global path, remaining {len(env.path)-i}")
     env.path = env.path[i:, :]
 
 

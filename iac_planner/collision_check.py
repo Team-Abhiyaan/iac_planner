@@ -13,9 +13,27 @@ from iac_planner.generate_velocity_profile import generate_velocity_profile
 from iac_planner.path_sampling._core import intersection_line_cubic, polyeval
 from iac_planner.path_sampling.types import Line_SI
 
+# import time
+# times = {}
+#
+#
+# def print_time(func):
+#     def wrapper(*arg, **kw):
+#         global times
+#         t1 = time.time()
+#         res = func(*arg, **kw)
+#         t2 = time.time()
+#         times[func.__name__] = times.get(func.__name__, 0) + t2 - t1
+#         return res
+#     return wrapper
+#
 
 class CollisionChecker:
     def __init__(self, env: Env, path_length: int, time_step: float):
+        # global times
+        # times.clear()
+        # self.print_times = True
+
         self.info = env.info
 
         params = env.collision_params
@@ -81,7 +99,11 @@ class CollisionChecker:
         else:
             self._obstacles = []
 
-        # generate time steps for single path
+    # def __del__(self):
+    #     if self.print_times:
+    #         global times
+    #         for k, v in times.items():
+    #             print(f"{k}: {v:.3f}")
 
     def generate_time_step(self, path, velocity_profile):
 
@@ -143,7 +165,7 @@ class CollisionChecker:
         # Somehow add a buffer to the lane borders???
 
 
-
+    # @print_time
     def _static_collision_check(self, path: path_t):
         """Returns a bool array on whether each path is collision free.
         args:
@@ -176,6 +198,7 @@ class CollisionChecker:
 
         if not self._lanes_collision_check(path):
             return False
+        return True
 
         # Iterate over the points in the path.
         for (i, pt) in enumerate(path):
@@ -205,6 +228,7 @@ class CollisionChecker:
 
         return True
 
+    # @print_time
     def _dynamic_collision_check(self, path: path_t):
         """ Returns a bool array on whether each path is collision free.
         args:
@@ -280,6 +304,7 @@ class CollisionChecker:
         self.other_vech_prev_vel = self.other_vech_current_vel
         return True
 
+    # @print_time
     def init_other_paths(self, path):
         velocity_profile = generate_velocity_profile(self._env, path)
         self._time_step = self.generate_time_step(path, velocity_profile)

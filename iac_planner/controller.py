@@ -96,9 +96,9 @@ class Controller:
         self.d = 4
         self.downforceCoeff = 0.965
         # dragCoeff= 0.514
-        self.dragCoeff = 0.51
+        self.dragCoeff = 0.445
         self.m = 630.0
-        self.mu = 0.90
+        self.mu = 1
         self.rollingFriction = 100.0
         self.maxPower = 294000
         self.FintoV = self.maxPower
@@ -426,8 +426,8 @@ class Controller:
 
         # if ( self.v > 44.2222):
         # self.throttle_output = 1
-        if (self.v > 86.77 and self.v < 86.9444):
-            self.throttle_output = 0.7
+        #if (self.v > 86.77 and self.v < 86.9444):
+            #self.throttle_output = 0.7
 
         # steer = self.steer_output - steeroutput_previous
         # throttle = self.throttle_output - throttleoutput_previous

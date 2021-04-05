@@ -110,8 +110,10 @@ def main(args: Optional[Iterable[str]] = None):
                     plt.clf()
                     plt.title(f"EGO {EGO}")
                     plt.gca().set_aspect('equal', adjustable='box')
-                    from iac_planner.collision_check import CollisionChecker
+                    plt.xlim((env.state[0] - 75, env.state[0] + 75))
+                    plt.ylim((env.state[1] - 75, env.state[1] + 75))
 
+                    from iac_planner.collision_check import CollisionChecker
                     cc = CollisionChecker(env, 20, time_step=0.5)
                     cc.init_other_paths(trajectory[0])
 
@@ -131,8 +133,6 @@ def main(args: Optional[Iterable[str]] = None):
                     for i, path in enumerate(cc._other_vehicle_paths):
                         plt.scatter(*path[:2], s=5, label=f"path {i + 1}", color='red')
 
-                    plt.xlim((env.state[0] - 75, env.state[0] + 75))
-                    plt.ylim((env.state[1] - 150, env.state[1] + 75))
                     plt.legend()
                     plt.pause(0.005)
 
@@ -235,7 +235,7 @@ def update_global_path(env: Env):
         return line_behind_vehicle(x, y) < 0
 
     if line_behind_vehicle(*env.path[0]) < -4:
-        return update_global_path_by_dist(env)
+        update_global_path_by_dist(env)
 
     while is_behind(*env.path[0]):
         print('Passed a point in global path.')
@@ -245,7 +245,7 @@ def update_global_path(env: Env):
 def update_global_path_by_dist(env: Env):
     def is_close(x: float, y: float) -> bool:
         xe, ye = env.state[:2]
-        return (x - xe) ** 2 + (y - ye) ** 2 <= 4 ** 2
+        return (x - xe) ** 2 + (y - ye) ** 2 <= 6 ** 2
 
     i = 0
     while not is_close(*env.path[i]):

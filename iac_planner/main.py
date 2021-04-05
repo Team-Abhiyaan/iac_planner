@@ -100,6 +100,8 @@ def main(args: Optional[List[str]] = None):
 
                 # ~ 30 ms
                 throttle, steer = controller.run_controller_timestep(env, trajectory)
+                if use_global:  # Emergency braking
+                    throttle = 0.1
 
                 t_logic = time.time()
                 print(f"time: {(t_logic - t_start):.3f}")

@@ -2,14 +2,14 @@
 """
 Visualizes the CTE of some simple paths using rviz2
 """
+import logging
 import sys
 import time
 from typing import Optional, Iterable, Callable
-import logging
 
 import numpy as np
-from rticonnextdds_connector import Input
 import rticonnextdds_connector as rti
+from rticonnextdds_connector import Input
 
 from iac_planner.controller import Controller
 from iac_planner.generate_paths import generate_paths
@@ -18,7 +18,6 @@ from iac_planner.helpers import Env, state_t
 from iac_planner.path_sampling.types import RoadLinePolynom
 from iac_planner.score_paths import score_paths
 
-# TODO: update this
 EGO = 1
 
 
@@ -104,11 +103,10 @@ def main(args: Optional[Iterable[str]] = None):
                 throttle, steer = controller.run_controller_timestep(env, trajectory)
 
                 t_logic = time.time()
-                print(f"time: {(t_logic-t_start):.3f}")
+                print(f"time: {(t_logic - t_start):.3f}")
 
                 if env.plot_paths:  # ~ 200ms
                     import matplotlib.pyplot as plt
-                    print(env.other_vehicle_states)
                     plt.clf()
                     plt.title(f"EGO {EGO}")
                     plt.gca().set_aspect('equal', adjustable='box')
@@ -131,7 +129,7 @@ def main(args: Optional[Iterable[str]] = None):
                                   label=f"other {i + 1}", color='red')
 
                     for i, path in enumerate(cc._other_vehicle_paths):
-                        plt.scatter(*path[:2], s=5,label=f"path {i+1}", color='red')
+                        plt.scatter(*path[:2], s=5, label=f"path {i + 1}", color='red')
 
                     plt.xlim((env.state[0] - 75, env.state[0] + 75))
                     plt.ylim((env.state[1] - 150, env.state[1] + 75))
@@ -184,13 +182,12 @@ def load_rti(env, inputs):
 
         right_array = roadlinepolyarray[1]
         env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
-                                    left_array['c3'])
+                                        left_array['c3'])
         env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
-                                     right_array['c3'])
+                                         right_array['c3'])
     else:
         print("ERROR: didn't get data")
 
-    # TODO: Load dynamic vehicles
     other_vehicle_states = inputs.other_vehicle_states
     other_vehicle_states.wait()
     other_vehicle_states.take()
@@ -216,16 +213,6 @@ def load_rti(env, inputs):
 def run(env: Env):
     info = env.info
 
-    # # Publish Global Path and Current Position
-    # visualize(env.m_pub, env.nh.get_clock(), 50, [env.state[:2]], scale=0.5,
-    #           color=ColorRGBA(r=1.0, b=1.0, a=1.0))
-    #
-    # visualize(env.m_pub, env.nh.get_clock(), 51, env.path)
-
-    # for i, state in enumerate(env.other_vehicle_states):
-    #     visualize(env.m_pub, env.nh.get_clock(), 52 + 1 + i, [state[:2]], scale=0.5,
-    #               color=ColorRGBA(r=1.0, g=1.0, a=1.0))
-
     paths = generate_paths(env)
 
     best_trajectory, cost = score_paths(env, paths, max_path_len=env.path_generation_params.n_pts_long)
@@ -233,7 +220,6 @@ def run(env: Env):
         info(f"Lowest {cost=:.2f}")
     else:
         info("ERROR: No trajectory found.")
-
     return best_trajectory
 
 
@@ -259,7 +245,7 @@ def update_global_path(env: Env):
 def update_global_path_by_dist(env: Env):
     def is_close(x: float, y: float) -> bool:
         xe, ye = env.state[:2]
-        return (x-xe)**2 + (y-ye)**2 <= 4**2
+        return (x - xe) ** 2 + (y - ye) ** 2 <= 4 ** 2
 
     i = 0
     while not is_close(*env.path[i]):
@@ -268,7 +254,7 @@ def update_global_path_by_dist(env: Env):
         if i + 10 > len(env.path):
             print("ERROR: No point in global path is close enough")
             return
-    print(f"Skipped {i} points in global path, remaining {len(env.path)-i}")
+    print(f"Skipped {i} points in global path, remaining {len(env.path) - i}")
     env.path = env.path[i:, :]
 
 

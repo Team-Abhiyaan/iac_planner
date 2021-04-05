@@ -5,7 +5,6 @@ import math
 
 # from std_msgs.msg import ColorRGBA
 
-from iac_planner.generate_markers import visualize
 from iac_planner.helpers import Env, path_t, state_t
 from iac_planner.generate_velocity_profile import generate_velocity_profile
 

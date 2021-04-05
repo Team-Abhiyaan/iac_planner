@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import TypeVar, Callable, List
+
 import numpy as np
 
 from iac_planner.path_sampling.global_path_handler import GlobalPathHandler
@@ -18,18 +19,17 @@ class VelParams:
     m: float = 630.0
     mu: float = 0.85
     rolling_friction: float = 100.0
-    d: float =4
-    tempVel: float= 0.0
+    d: float = 4
+    tempVel: float = 0.0
     tmp: float = 0.0
     power: float = 3140
-    downforceCoeff: float= 0.965
+    downforceCoeff: float = 0.965
     alphar: float = 0.0
     Calpha: float = 867
     dragCoeff: float = 0.445
-    maxPower: float= 314000
+    maxPower: float = 314000
     FintoV: float = 314000
     back: float = 10
-
 
 
 @dataclass
@@ -44,7 +44,6 @@ class CollisionParams:
 class PathGenerationParams:
     n_long: int = 10
     n_pts_long: int = 100
-
 
 
 state_t = TypeVar('state_t')  # np.ndarray[[3], float]
@@ -64,7 +63,7 @@ class Env:
     info: Callable[[str], None] = None
 
     state: state_t = np.zeros(4)  # [x, y, theta, v]
-    gear = None # IDK datatype
+    gear = None  # IDK datatype
     path: path_t = None  # [ [x, y], ... ]
 
     obstacles: np.ndarray = np.zeros((0, 2))

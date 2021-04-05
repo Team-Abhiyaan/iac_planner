@@ -1,4 +1,4 @@
-from typing import Generator, List
+from typing import Generator, Optional
 
 import numpy as np
 
@@ -13,14 +13,12 @@ def generate_paths(env) -> Generator[path_t, None, None]:
     TODO: Replace with an actual path generator
 
     :param env: Environment
-    :param n: Number of paths
-    :param n_pts: Number of points in each path
     :return:
     """
     s = env.state
     p = Pose(s[0], s[1], yaw=s[2])
 
-    p_obs: Pose = None
+    p_obs: Optional[Pose] = None
     if len(env.other_vehicle_states) != 0:
         state = env.other_vehicle_states[0]
         p_obs = Pose(state[0], state[1], yaw=state[2])

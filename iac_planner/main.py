@@ -209,7 +209,8 @@ def load_rti(env, inputs):
         xx, yy = x * np.cos(eyaw) - y * np.sin(eyaw), x * np.sin(eyaw) + y * np.cos(eyaw)
         xx += env.state[0]
         yy += env.state[1]
-        env.other_vehicle_states.append(np.array([x+env.state[0], y+env.state[1], yaw+env.state[2], v]))
+        yaw += eyaw
+        env.other_vehicle_states.append(np.array([xx, yy, yaw, v]))
 
 
 def run(env: Env):

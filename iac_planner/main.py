@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""
-Visualizes the CTE of some simple paths using rviz2
-"""
+
 import logging
 import sys
 import time
-from typing import Optional, Iterable, Callable
+from typing import Optional, Iterable, Callable, List
 
 import numpy as np
 import rticonnextdds_connector as rti
@@ -37,11 +35,12 @@ logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger(__name__)
 
 
-def main(args: Optional[Iterable[str]] = None):
+def main(args: Optional[List[str]] = None):
     env: Env = Env()
     info: Callable[[str], None] = _logger.info
     env.info = info
 
+    global EGO
     EGO = 1
     if args is not None and len(args) >= 2 and args[1].strip() == '2':
         EGO = 2
@@ -55,7 +54,7 @@ def main(args: Optional[Iterable[str]] = None):
     np_path = env.global_path_handler.global_path.to_numpy()[:, :2]  # Take only (x, y) from path.
     env.path = np.vstack([np_path] * 6 + [np_path[:20, :]])  # Repeat for 6 laps
 
-    info(f"Loaded path from {GLOBAL_PATH_CSV_FILE} of lenght {len(env.path)}")
+    info(f"Loaded path from {GLOBAL_PATH_CSV_FILE} of length {len(env.path)}")
 
     try:
         with rti.open_connector(config_name="SCADE_DS_Controller::Controller",
@@ -176,11 +175,11 @@ def load_rti(env, inputs):
     track_poly = None
     for track_poly in track_polys.samples.valid_data_iter:
         pass
-    roadlinepolyarray = track_poly['roadLinesPolynomsArray']
-    if len(roadlinepolyarray) >= 2:
-        left_array = roadlinepolyarray[0]
+    road_line_polys = track_poly['roadLinesPolynomsArray']
+    if len(road_line_polys) >= 2:
+        left_array = road_line_polys[0]
 
-        right_array = roadlinepolyarray[1]
+        right_array = road_line_polys[1]
         env.left_poly = RoadLinePolynom(left_array['c0'], left_array['c1'], left_array['c2'],
                                         left_array['c3'])
         env.right_poly = RoadLinePolynom(right_array['c0'], right_array['c1'], right_array['c2'],
@@ -195,18 +194,20 @@ def load_rti(env, inputs):
     other_vehicles = None
     for other_vehicles in other_vehicle_states.samples.valid_data_iter:
         pass
-    targetsArray = other_vehicles['targetsArray']
-    print(f"{len(targetsArray)} other vehicles")
-    for other_vehicle in targetsArray:
+    targets_array = other_vehicles['targetsArray']
+    print(f"{len(targets_array)} other vehicles")
+    for other_vehicle in targets_array:
         x = other_vehicle['posXInChosenRef']
         y = other_vehicle['posYInChosenRef']
         yaw = other_vehicle['posHeadingInChosenRef']
         v = other_vehicle['absoluteSpeedX']
-        eyaw = env.state[2]
-        xx, yy = x * np.cos(eyaw) - y * np.sin(eyaw), x * np.sin(eyaw) + y * np.cos(eyaw)
+        ego_yaw = env.state[2]
+        xx, yy = \
+            x * np.cos(ego_yaw) - y * np.sin(ego_yaw), \
+            x * np.sin(ego_yaw) + y * np.cos(ego_yaw)
         xx += env.state[0]
         yy += env.state[1]
-        yaw += eyaw
+        yaw += ego_yaw
         env.other_vehicle_states.append(np.array([xx, yy, yaw, v]))
 
 

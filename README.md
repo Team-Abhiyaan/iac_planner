@@ -4,12 +4,24 @@
 pip install -r requirements.txt
 ```
 
+### Running
 ```bash
-colcon build --symlink-install --packages-up-to iac_planner
-ros2 launch iac_planner main.launch.py
+# Run as ego 1
+iac_planner $ python run_me.py
+iac_planner $ python run_me.py 1
+
+# Run as ego 2
+iac_planner $ python run_me.py 2
+
+# Disable plotting
+# Can also be done by changing ./iac_planner/helpers.py
+iac_planner $ python run_me.py 1 --no-plot
+iac_planner $ python run_me.py 2 --no-plot
+
+# Currently argument parsing is very rudimentary and only supports the above forms
 ```
 
-requires colcon, ros2, rviz2, numpy, and scipy.spatial
+requires numpy, scipy, pandas, rticonnextdds-connector, matplotlib [optional]
 
 For [Team-Abhiyaan](http://github.com/Team-Abhiyaan/)
 

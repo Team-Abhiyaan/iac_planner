@@ -22,6 +22,8 @@ EGO = 1
 def get_xml_url(ego: int) -> str:
     if ego == 2:
         return "./resources/RtiSCADE_DS_Controller_ego2.xml"
+    elif ego == 5:
+        return "./resources/RtiSCADE_DS_Controller_ego5.xml"
     elif ego == 1:
         return "./resources/RtiSCADE_DS_Controller_ego1.xml"
     else:

@@ -10,13 +10,14 @@ pip install -r requirements.txt
 iac_planner $ python run_me.py
 iac_planner $ python run_me.py 1
 
-# Run as ego 2
+# Run as other egos
 iac_planner $ python run_me.py 2
-
+iac_planner $ python run_me.py 5
 # Disable plotting
 # Can also be done by changing ./iac_planner/helpers.py
 iac_planner $ python run_me.py 1 --no-plot
 iac_planner $ python run_me.py 2 --no-plot
+iac_planner $ python run_me.py 5 --no-plot
 
 # Currently argument parsing is very rudimentary and only supports the above forms
 ```

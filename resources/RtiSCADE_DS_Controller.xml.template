@@ -258,9 +258,9 @@
         <member name="wheelRotation" arrayDimensions="4" type="float64"/>
         <member name="wheelRotationSpeed" arrayDimensions="4" type="float64"/>
       </struct>
-      
+
     </module>
-	
+
 	<module name="DDS">
 	<struct name= "Octets_">
         <member name="value" sequenceMaxLength="2048" type="byte"/>
@@ -279,114 +279,113 @@
       <register_type name="CabToSteeringCorrective" type_ref="IndyDS::CabToSteeringCorrective"/>
       <register_type name="VehicleOutput" type_ref="IndyDS::VehicleOutput"/>
 	  <register_type name="DDS::Octets_" type_ref="DDS::Octets_"/>
-      <topic name="cameraRoadLinesPolynoms_F1_ego5" register_type_ref="RoadLinesPolynoms"/>
-      <topic name="cameraRoadLinesPolynoms_F2_ego5" register_type_ref="RoadLinesPolynoms"/>
-      <topic name="cameraRoadLinesPolynoms_FL_ego5" register_type_ref="RoadLinesPolynoms"/>
-      <topic name="cameraRoadLinesPolynoms_FR_ego5" register_type_ref="RoadLinesPolynoms"/>
-      <topic name="cameraRoadLinesPolynoms_RL_ego5" register_type_ref="RoadLinesPolynoms"/>
-      <topic name="cameraRoadLinesPolynoms_RR_ego5" register_type_ref="RoadLinesPolynoms"/>
-      <topic name="cameraSensorMovableTargetsBoundingBoxes_F1_ego5" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
-      <topic name="cameraSensorMovableTargetsBoundingBoxes_F2_ego5" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
-      <topic name="cameraSensorMovableTargetsBoundingBoxes_FL_ego5" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
-      <topic name="cameraSensorMovableTargetsBoundingBoxes_FR_ego5" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
-      <topic name="cameraSensorMovableTargetsBoundingBoxes_RL_ego5" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
-      <topic name="cameraSensorMovableTargetsBoundingBoxes_RR_ego5" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
-      <topic name="gpsGPS_ego5" register_type_ref="GPS"/>
-      <topic name="lidarLaserMeter_FlashA_ego5" register_type_ref="LaserMeter"/>
-      <topic name="lidarLaserMeter_FlashB_ego5" register_type_ref="LaserMeter"/>
-      <topic name="lidarLaserMeter_FlashC_ego5" register_type_ref="LaserMeter"/>
-      <topic name="radarSensorMovableTargets_F_ego5" register_type_ref="SensorMovableTargets"/>
-      <topic name="radarSensorMovableTargets_Port_ego5" register_type_ref="SensorMovableTargets"/>
-      <topic name="radarSensorMovableTargets_R_ego5" register_type_ref="SensorMovableTargets"/>
-      <topic name="radarSensorMovableTargets_Stbd_ego5" register_type_ref="SensorMovableTargets"/>
-      <topic name="toVehicleCabToModelCorrective_ego5" register_type_ref="CabToModelCorrective"/>
-      <topic name="toVehicleSteeringCorrective_ego5" register_type_ref="CabToSteeringCorrective"/>
-      <topic name="vehicleStateVehicleOutput_ego5" register_type_ref="VehicleOutput"/>
-	  <topic name="dds_done_reply5" register_type_ref="DDS::Octets_"/>
-      <topic name="dds_done5" register_type_ref="DDS::Octets_"/>
+      <topic name="cameraRoadLinesPolynoms_F1_ego&ego_id;" register_type_ref="RoadLinesPolynoms"/>
+      <topic name="cameraRoadLinesPolynoms_F2_ego&ego_id;" register_type_ref="RoadLinesPolynoms"/>
+      <topic name="cameraRoadLinesPolynoms_FL_ego&ego_id;" register_type_ref="RoadLinesPolynoms"/>
+      <topic name="cameraRoadLinesPolynoms_FR_ego&ego_id;" register_type_ref="RoadLinesPolynoms"/>
+      <topic name="cameraRoadLinesPolynoms_RL_ego&ego_id;" register_type_ref="RoadLinesPolynoms"/>
+      <topic name="cameraRoadLinesPolynoms_RR_ego&ego_id;" register_type_ref="RoadLinesPolynoms"/>
+      <topic name="cameraSensorMovableTargetsBoundingBoxes_F1_ego&ego_id;" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
+      <topic name="cameraSensorMovableTargetsBoundingBoxes_F2_ego&ego_id;" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
+      <topic name="cameraSensorMovableTargetsBoundingBoxes_FL_ego&ego_id;" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
+      <topic name="cameraSensorMovableTargetsBoundingBoxes_FR_ego&ego_id;" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
+      <topic name="cameraSensorMovableTargetsBoundingBoxes_RL_ego&ego_id;" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
+      <topic name="cameraSensorMovableTargetsBoundingBoxes_RR_ego&ego_id;" register_type_ref="SensorMovableTargetsBoundingBoxes"/>
+      <topic name="gpsGPS_ego&ego_id;" register_type_ref="GPS"/>
+      <topic name="lidarLaserMeter_FlashA_ego&ego_id;" register_type_ref="LaserMeter"/>
+      <topic name="lidarLaserMeter_FlashB_ego&ego_id;" register_type_ref="LaserMeter"/>
+      <topic name="lidarLaserMeter_FlashC_ego&ego_id;" register_type_ref="LaserMeter"/>
+      <topic name="radarSensorMovableTargets_F_ego&ego_id;" register_type_ref="SensorMovableTargets"/>
+      <topic name="radarSensorMovableTargets_Port_ego&ego_id;" register_type_ref="SensorMovableTargets"/>
+      <topic name="radarSensorMovableTargets_R_ego&ego_id;" register_type_ref="SensorMovableTargets"/>
+      <topic name="radarSensorMovableTargets_Stbd_ego&ego_id;" register_type_ref="SensorMovableTargets"/>
+      <topic name="toVehicleCabToModelCorrective_ego&ego_id;" register_type_ref="CabToModelCorrective"/>
+      <topic name="toVehicleSteeringCorrective_ego&ego_id;" register_type_ref="CabToSteeringCorrective"/>
+      <topic name="vehicleStateVehicleOutput_ego&ego_id;" register_type_ref="VehicleOutput"/>
+	  <topic name="dds_done_reply&ego_id;" register_type_ref="DDS::Octets_"/>
+      <topic name="dds_done&ego_id;" register_type_ref="DDS::Octets_"/>
     </domain>
   </domain_library>
   <!-- Participant library -->
   <domain_participant_library name="SCADE_DS_Controller">
     <domain_participant name="Controller" domain_ref="VRX::DS">
-	
+
 	<publisher name="toVehicleModelCorrectivePub">
-        <data_writer name="toVehicleModelCorrectiveWriter" topic_ref="toVehicleCabToModelCorrective_ego5" />
+        <data_writer name="toVehicleModelCorrectiveWriter" topic_ref="toVehicleCabToModelCorrective_ego&ego_id;" />
      </publisher>
 	 <publisher name="toVehicleSteeringPub">
-        <data_writer name="toVehicleSteeringWriter" topic_ref="toVehicleSteeringCorrective_ego5" />
+        <data_writer name="toVehicleSteeringWriter" topic_ref="toVehicleSteeringCorrective_ego&ego_id;" />
       </publisher>
       <publisher name="toSimDonePub">
-        <data_writer name="toSimDoneWriter" topic_ref="dds_done_reply5" />
+        <data_writer name="toSimDoneWriter" topic_ref="dds_done_reply&ego_id;" />
       </publisher>
 
       <subscriber name="camRoadLinesF1Sub">
-        <data_reader name="camRoadLinesF1Reader" topic_ref="cameraRoadLinesPolynoms_F1_ego5" />
+        <data_reader name="camRoadLinesF1Reader" topic_ref="cameraRoadLinesPolynoms_F1_ego&ego_id;" />
       </subscriber>
 	  <subscriber name="camRoadLinesF2Sub">
-        <data_reader name="camRoadLinesF2Reader" topic_ref="cameraRoadLinesPolynoms_F2_ego5" />
+        <data_reader name="camRoadLinesF2Reader" topic_ref="cameraRoadLinesPolynoms_F2_ego&ego_id;" />
       </subscriber>
       <subscriber name="camRoadLinesFLSub">
-        <data_reader name="camRoadLinesFLReader" topic_ref="cameraRoadLinesPolynoms_FL_ego5" />
+        <data_reader name="camRoadLinesFLReader" topic_ref="cameraRoadLinesPolynoms_FL_ego&ego_id;" />
       </subscriber>
       <subscriber name="camRoadLinesFRSub">
-        <data_reader name="camRoadLinesFRReader" topic_ref="cameraRoadLinesPolynoms_FR_ego5" />
+        <data_reader name="camRoadLinesFRReader" topic_ref="cameraRoadLinesPolynoms_FR_ego&ego_id;" />
       </subscriber>
       <subscriber name="camRoadLinesRLSub">
-        <data_reader name="camRoadLinesRLReader" topic_ref="cameraRoadLinesPolynoms_RL_ego5" />
+        <data_reader name="camRoadLinesRLReader" topic_ref="cameraRoadLinesPolynoms_RL_ego&ego_id;" />
       </subscriber>
       <subscriber name="camRoadLinesRRSub">
-        <data_reader name="camRoadLinesRRReader" topic_ref="cameraRoadLinesPolynoms_RR_ego5" />
+        <data_reader name="camRoadLinesRRReader" topic_ref="cameraRoadLinesPolynoms_RR_ego&ego_id;" />
       </subscriber>
       <subscriber name="simWaitSub">
-        <data_reader name="simWaitReader" topic_ref="dds_done5" />
+        <data_reader name="simWaitReader" topic_ref="dds_done&ego_id;" />
       </subscriber>
 		<subscriber name="radarFSub">
-        <data_reader name="radarFReader" topic_ref="radarSensorMovableTargets_F_ego5" />
+        <data_reader name="radarFReader" topic_ref="radarSensorMovableTargets_F_ego&ego_id;" />
       </subscriber>
       <subscriber name="radarPortSub">
-        <data_reader name="radarPortReader" topic_ref="radarSensorMovableTargets_Port_ego5" />
+        <data_reader name="radarPortReader" topic_ref="radarSensorMovableTargets_Port_ego&ego_id;" />
       </subscriber>
       <subscriber name="radarRSub">
-        <data_reader name="radarRReader" topic_ref="radarSensorMovableTargets_R_ego5" />
+        <data_reader name="radarRReader" topic_ref="radarSensorMovableTargets_R_ego&ego_id;" />
       </subscriber>
       <subscriber name="radarStbdSub">
-        <data_reader name="radarStbdReader" topic_ref="radarSensorMovableTargets_Stbd_ego5" />
+        <data_reader name="radarStbdReader" topic_ref="radarSensorMovableTargets_Stbd_ego&ego_id;" />
       </subscriber>
       <subscriber name="vehicleStateOutSub">
-        <data_reader name="vehicleStateOutReader" topic_ref="vehicleStateVehicleOutput_ego5" />
+        <data_reader name="vehicleStateOutReader" topic_ref="vehicleStateVehicleOutput_ego&ego_id;" />
       </subscriber>
 	  <subscriber name="camMTBoxesF1Sub">
-        <data_reader name="MTBoxesF1Reader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_F1_ego5" />
+        <data_reader name="MTBoxesF1Reader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_F1_ego&ego_id;" />
       </subscriber>
 	  <subscriber name="camMTBoxesF2Sub">
-        <data_reader name="MTBoxesF2Reader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_F2_ego5" />
+        <data_reader name="MTBoxesF2Reader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_F2_ego&ego_id;" />
       </subscriber>
       <subscriber name="camMTBoxesFLSub">
-        <data_reader name="MTBoxesFLReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_FL_ego5" />
+        <data_reader name="MTBoxesFLReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_FL_ego&ego_id;" />
       </subscriber>
       <subscriber name="camMTBoxesFRSub">
-        <data_reader name="MTBoxesFRReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_FR_ego5" />
+        <data_reader name="MTBoxesFRReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_FR_ego&ego_id;" />
       </subscriber>
       <subscriber name="camMTBoxesRLSub">
-        <data_reader name="MTBoxesRLReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_RL_ego5" />
+        <data_reader name="MTBoxesRLReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_RL_ego&ego_id;" />
       </subscriber>
       <subscriber name="camMTBoxesRRSub">
-        <data_reader name="MTBoxesRRReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_RR_ego5" />
-      </subscriber>      
+        <data_reader name="MTBoxesRRReader" topic_ref="cameraSensorMovableTargetsBoundingBoxes_RR_ego&ego_id;" />
+      </subscriber>
       <subscriber name="gpsGPSSub">
-        <data_reader name="gpsGPSReader" topic_ref="gpsGPS_ego5" />
+        <data_reader name="gpsGPSReader" topic_ref="gpsGPS_ego&ego_id;" />
       </subscriber>
       <subscriber name="lidarLaserMeter_FlashASub">
-        <data_reader name="lidarLaserMeter_FlashAReader" topic_ref="lidarLaserMeter_FlashA_ego5" />
+        <data_reader name="lidarLaserMeter_FlashAReader" topic_ref="lidarLaserMeter_FlashA_ego&ego_id;" />
       </subscriber>
       <subscriber name="lidarLaserMeter_FlashBSub">
-        <data_reader name="lidarLaserMeter_FlashBReader" topic_ref="lidarLaserMeter_FlashB_ego5" />
+        <data_reader name="lidarLaserMeter_FlashBReader" topic_ref="lidarLaserMeter_FlashB_ego&ego_id;" />
       </subscriber>
 	  <subscriber name="lidarLaserMeter_FlashCSub">
-        <data_reader name="lidarLaserMeter_FlashCReader" topic_ref="lidarLaserMeter_FlashC_ego5" />
+        <data_reader name="lidarLaserMeter_FlashCReader" topic_ref="lidarLaserMeter_FlashC_ego&ego_id;" />
       </subscriber>
 	</domain_participant>
   </domain_participant_library>
-  
 </dds>

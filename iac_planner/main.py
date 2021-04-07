@@ -16,16 +16,10 @@ from iac_planner.helpers import Env, state_t
 from iac_planner.path_sampling.types import RoadLinePolynom
 from iac_planner.score_paths import score_paths
 
-EGO = 1
-
 
 def get_xml_url(ego: int) -> str:
-    if ego == 2:
-        return "./resources/RtiSCADE_DS_Controller_ego2.xml"
-    elif ego == 5:
-        return "./resources/RtiSCADE_DS_Controller_ego5.xml"
-    elif ego == 1:
-        return "./resources/RtiSCADE_DS_Controller_ego1.xml"
+    if 1 <= ego <= 8:
+        return f"./resources/RtiSCADE_DS_Controller_ego{ego}.xml"
     else:
         raise Exception("Invalid EGO number")
 
@@ -42,11 +36,11 @@ def main(args: Optional[List[str]] = None):
     info: Callable[[str], None] = _logger.info
     env.info = info
 
-    global EGO
-    EGO = 1
-    if args is not None and len(args) >= 2 and args[1].strip() == '2':
-        EGO = 2
+    EGO: int = 1
+    if args is not None and len(args) >= 2:
+        EGO = int(args[1])
     print(f"Using ego {EGO}")
+
     if args is not None and len(args) >= 3 and args[2].strip() == '--no-plot':
         env.plot_paths = False
 

@@ -6,15 +6,19 @@ pip install -r requirements.txt
 
 ### Running
 ```bash
+# Create XML files
+iac_planner $ python resources/DS_Controller_Generator.py
+
 # Run as ego 1
 iac_planner $ python run_me.py
 iac_planner $ python run_me.py 1
 
 # Run as other egos
 iac_planner $ python run_me.py 2
-iac_planner $ python run_me.py 5
+iac_planner $ python run_me.py 8
+
 # Disable plotting
-# Can also be done by changing ./iac_planner/helpers.py
+# Can also be done by changing the configuration in ./iac_planner/helpers.py
 iac_planner $ python run_me.py 1 --no-plot
 iac_planner $ python run_me.py 2 --no-plot
 iac_planner $ python run_me.py 5 --no-plot

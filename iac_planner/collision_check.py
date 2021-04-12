@@ -3,8 +3,6 @@ import scipy.spatial
 
 import math
 
-# from std_msgs.msg import ColorRGBA
-
 from iac_planner.helpers import Env, path_t, state_t
 from iac_planner.generate_velocity_profile import generate_velocity_profile
 
@@ -12,6 +10,8 @@ from iac_planner.generate_velocity_profile import generate_velocity_profile
 from iac_planner.path_sampling._core import intersection_line_cubic, polyeval
 from iac_planner.path_sampling.types import Line_SI
 
+
+# # For Timing
 # import time
 # times = {}
 #
@@ -27,8 +27,10 @@ from iac_planner.path_sampling.types import Line_SI
 #     return wrapper
 #
 
+
 class CollisionChecker:
     def __init__(self, env: Env, path_length: int, time_step: float):
+        # # For Timing
         # global times
         # times.clear()
         # self.print_times = True
@@ -98,6 +100,7 @@ class CollisionChecker:
         else:
             self._obstacles = []
 
+    # # For Timing
     # def __del__(self):
     #     if self.print_times:
     #         global times
@@ -136,33 +139,31 @@ class CollisionChecker:
 
         return other_vehicle_paths
 
-    def _lanes_collision_check(self, path:path_t):
+    def _lanes_collision_check(self, path: path_t):
         if self._env.left_poly is None or self._env.right_poly is None:
             print("NO POLY!!!")
             return True
 
         if len(path) == 0:
-            assert (False, "Empty Path") 
+            assert (False, "Empty Path")
 
-        # Transform path to local frame
+            # Transform path to local frame
         env = self._env
         yaw = env.state[2]
-        pos_cur = np.array([env.state[0], env.state[1]]).reshape((1,2))
-        rot_matrix =  np.array([
-            [  np.cos(-yaw),  np.sin(-yaw)], 
-            [ -np.sin(-yaw),  np.cos(-yaw)]]
+        pos_cur = np.array([env.state[0], env.state[1]]).reshape((1, 2))
+        rot_matrix = np.array([
+            [np.cos(-yaw), np.sin(-yaw)],
+            [-np.sin(-yaw), np.cos(-yaw)]]
         )
         p_trans = (path - pos_cur) @ rot_matrix
 
         # Check for outside lane
+        # TODO: Add a buffer
         for pt in p_trans:
-            if (polyeval(pt[0], self._env.left_poly)-pt[1]) * (polyeval(pt[0], self._env.right_poly)-pt[1]) > 0:
+            if (polyeval(pt[0], self._env.left_poly) - pt[1]) * (polyeval(pt[0], self._env.right_poly) - pt[1]) > 0:
                 return False
-        
+
         return True
-
-        # Somehow add a buffer to the lane borders???
-
 
     # @print_time
     def _static_collision_check(self, path: path_t):
@@ -197,34 +198,6 @@ class CollisionChecker:
 
         if not self._lanes_collision_check(path):
             return False
-        return True
-
-        # Iterate over the points in the path.
-        for (i, pt) in enumerate(path):
-
-            circle_locations = np.zeros((1, 2))
-
-            # TODO: Find better approximation of theta
-            # Take two indices to find slope
-            i1 = i - 1 if i > 0 else i
-            i2 = i + 1 if i < len(path) - 1 else i
-            theta = np.arctan2(path[i2, 1] - path[i1, 1], path[i2, 1] - path[i, 1])
-
-            circle_locations[0, 0] = pt[0] + self._circle_offset * math.cos(theta)
-            circle_locations[0, 1] = pt[1] + self._circle_offset * math.sin(theta)
-
-            for obstacle in self._obstacles:
-                collision_dists = scipy.spatial.distance.cdist(np.array([obstacle]), circle_locations)
-                collision_dists = np.subtract(collision_dists, self._circle_radii)
-                if np.any(collision_dists < 0):
-                    return False
-
-            # # Loop not required right?
-            # collision_dists = scipy.spatial.distance.cdist(np.array(self._obstacles), circle_locations)
-            # collision_dists = np.subtract(collision_dists, self._circle_radii)
-            # if np.any(collision_dists < 0):
-            #     return False
-
         return True
 
     # @print_time

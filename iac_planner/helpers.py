@@ -62,15 +62,15 @@ class Env:
 
     info: Callable[[str], None] = None
 
-    state: state_t = np.zeros(4)  # [x, y, theta, v]
+    state: state_t = np.zeros(4)  # [x, y, theta, v] # Global Frame
     gear = None  # IDK datatype
     path: path_t = None  # [ [x, y], ... ]
 
     obstacles: np.ndarray = np.zeros((0, 2))
-    other_vehicle_states: List[state_t] = ()
+    other_vehicle_states: List[state_t] = ()  # Local Frame
 
-    left_poly: RoadLinePolynom = None
-    right_poly: RoadLinePolynom = None
+    left_poly: RoadLinePolynom = None  # Local Frame
+    right_poly: RoadLinePolynom = None  # Local Frame
 
     global_path_handler: GlobalPathHandler = GlobalPathHandler()
 

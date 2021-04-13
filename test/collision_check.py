@@ -84,9 +84,25 @@ if __name__ == '__main__':
 
     cc = CollisionChecker(env, path_length=20, time_step=0.5)
 
+
     # Ego
-    plt.arrow(env.state[0], env.state[1],
-              10 * np.cos(env.state[2]), 10 * np.sin(env.state[2]), head_width=2, label='vehicle', zorder=100)
+    # Overall Length 192 inches/4876 mm
+    # Overall Width 76 inches/1930 mm
+
+
+    def draw_rect(center, theta=0, L=4.876, W=1.930, **kwargs):
+        c, s = np.cos(theta), np.sin(theta)
+        plt.gca().add_artist(
+            plt.Rectangle(center + np.array([-c * L / 2 + s * W / 2, -s * L / 2 - c * W / 2]), width=L, height=W,
+                      angle=theta * 180 / np.pi, **kwargs))
+
+
+    # plt.arrow(env.state[0], env.state[1],
+    #           10 * np.cos(env.state[2]), 10 * np.sin(env.state[2]), head_width=2, label='vehicle', zorder=100)
+    draw_rect(env.state[:2], env.state[2], color="blue")
+    plt.gca().add_artist(
+        plt.Circle(env.state[:2], env.collision_params.circle_radii, color='red')
+    )
 
     # Lanes
     if len(lane_boundry_pts := env.lane_to_points()) != 0:
@@ -102,6 +118,8 @@ if __name__ == '__main__':
                   10 * np.cos(state[2] + env.state[2]), 10 * np.sin(state[2] + env.state[2]),
                   head_width=2,
                   label=f"other {i + 1}", color='black', zorder=50)
+        # draw_rect(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
+
         plt.plot(*env.shift_to_global(path).T, linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
 
     plt.show()

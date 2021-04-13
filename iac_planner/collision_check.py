@@ -3,12 +3,11 @@ import scipy.spatial
 
 import math
 
-from iac_planner.helpers import Env, path_t, state_t
+from iac_planner.helpers import Env, path_t, CollisionParams
 from iac_planner.generate_velocity_profile import generate_velocity_profile
 
 # TODO: Fix docstrings
-from iac_planner.path_sampling._core import intersection_line_cubic, polyeval
-from iac_planner.path_sampling.types import Line_SI
+from iac_planner.path_sampling._core import polyeval
 
 
 # # For Timing
@@ -35,20 +34,16 @@ class CollisionChecker:
         # times.clear()
         # self.print_times = True
 
-        self.info = env.info
+        self._params: CollisionParams = env.collision_params
 
-        params = env.collision_params
-        self._circle_offset = params.circle_offset
-        self._circle_radii = params.circle_radii
-        self._growth_factor_a = params.growth_factor_a
-        self._growth_factor_b = params.growth_factor_b
         self.other_vech_current_vel = 0
         self.other_vech_prev_vel = 0
+
         self._time_step = time_step
         self._path_length = path_length
-        global other_vehicle_states
-        other_vehicle_states = env.other_vehicle_states
-        self._other_vehicle_paths = np.zeros((len(other_vehicle_states), 3, path_length), dtype=float)
+
+        self.other_vehicle_states = env.other_vehicle_states
+        self._other_vehicle_paths = np.zeros((len(self.other_vehicle_states), 3, path_length), dtype=float)
         self._env = env
 
         # for i in range(len(self._other_vehicle_paths)):
@@ -64,7 +59,7 @@ class CollisionChecker:
 
         #     self._other_vehicle_paths[i] = vehicle_path
 
-        self.other_vech_current_vel = None if len(other_vehicle_states) == 0 else other_vehicle_states[0][3]
+        self.other_vech_current_vel = None if len(self.other_vehicle_states) == 0 else self.other_vehicle_states[0][3]
 
         # Takes in a set of obstacle borders and path waypoints and returns
         # a boolean collision check array that tells if a path has an obstacle
@@ -107,8 +102,8 @@ class CollisionChecker:
     #         for k, v in times.items():
     #             print(f"{k}: {v:.3f}")
 
-    def generate_time_step(self, path, velocity_profile):
-
+    @staticmethod
+    def generate_time_step(path, velocity_profile):
         time_step = np.zeros((len(velocity_profile),), dtype=float)
 
         for i in range(len(velocity_profile) - 1):
@@ -117,7 +112,8 @@ class CollisionChecker:
 
         return time_step
 
-    def generate_other_vehicle_paths(self, time_step, other_vehicle_states):
+    @staticmethod
+    def generate_other_vehicle_paths(time_step, other_vehicle_states):
         other_vehicle_paths = np.zeros((len(other_vehicle_states), 3, len(time_step)), dtype=float)
 
         for i in range(len(other_vehicle_paths)):
@@ -233,7 +229,6 @@ class CollisionChecker:
                     ith path in the paths list.
         """
         self.init_other_paths(path)
-        global other_vehicle_states
 
         if len(self._other_vehicle_paths) == 0:
             return True
@@ -249,7 +244,7 @@ class CollisionChecker:
             # generating ego vehicle's circle location from the given offset
             ego_circle_locations = np.zeros((1, 2))
 
-            circle_offset = self._circle_offset
+            circle_offset = self._params.circle_offset
             ego_circle_locations[:, 0] = path[0][j] + circle_offset * math.cos(path[2][j])
             ego_circle_locations[:, 1] = path[1][j] + circle_offset * math.sin(path[2][j])
 
@@ -263,11 +258,11 @@ class CollisionChecker:
                     self._other_vehicle_paths[k][2][j])
 
                 # calculating if any collisions occur
-                growth_factor = self._growth_factor_b + self._growth_factor_a * (
+                growth_factor = self._params.growth_factor_b + self._params.growth_factor_a * (
                         self.other_vech_current_vel - self.other_vech_prev_vel) / self.other_vech_current_vel
                 collision_dists = scipy.spatial.distance.cdist(other_circle_locations, ego_circle_locations)
                 collision_dists = np.subtract(collision_dists,
-                                              self._circle_radii *
+                                              self._params.circle_radii *
                                               (2 + growth_factor * np.sum(time_step[:j])))
 
                 if np.any(collision_dists < 0):
@@ -280,8 +275,7 @@ class CollisionChecker:
     def init_other_paths(self, path):
         velocity_profile = generate_velocity_profile(self._env, path)
         self._time_step = self.generate_time_step(path, velocity_profile)
-        global other_vehicle_states
-        self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_step, other_vehicle_states)
+        self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_step, self.other_vehicle_states)
 
     def check_collisions(self, path: path_t):
         return self._static_collision_check(path) and self._dynamic_collision_check(path)

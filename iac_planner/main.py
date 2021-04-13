@@ -114,9 +114,10 @@ def main(args: Optional[List[str]] = None):
                     cc = CollisionChecker(env, 20, time_step=0.5)
                     cc.init_other_paths(trajectory[0])
 
-                    if len(cc.obstacles) != 0:
-                        plt.scatter(*zip(*cc.obstacles), label='obstacles', s=5)
+                    if len(lane_boundry_pts := env.lane_to_points()) != 0:
+                        plt.scatter(*zip(*lane_boundry_pts), label='obstacles', s=5)
                     plt.scatter(*env.path[:40].T, label='global path', s=5)
+
                     if trajectory is not None:
                         plt.scatter(*trajectory[0].T, label=('local path' if not use_global else 'fake local'), s=5)
                     plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),

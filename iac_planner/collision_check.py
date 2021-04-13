@@ -69,35 +69,6 @@ class CollisionChecker:
         # Find line perpendicular to the ego vehicles current heading
         # Find line with same slope but 5 meters ahead
 
-        # TODO: Only used by visualization
-        self.obstacles = []
-        if env.left_poly is not None and env.right_poly is not None:
-
-            cl = [env.left_poly.c3, env.left_poly.c2, env.left_poly.c1, env.left_poly.c0][::-1]
-            cr = [env.right_poly.c3, env.right_poly.c2, env.right_poly.c1, env.right_poly.c0][::-1]
-
-            # Generate points on the lane boundaries
-            # Lane boundary is in local frame
-            x0, y0 = 0, 0  # env.state[:2]
-            x_l = np.linspace(x0 - 20, x0 + 150, 40)
-            x_r = np.linspace(x0 - 20, x0 + 150, 40)
-
-            y_l = np.array([polyeval(c, cl) for c in x_l])
-            y_r = np.array([polyeval(c, cr) for c in x_r])
-            yaw = env.state[2]
-            x_ll, y_ll = x_l * np.cos(yaw) - y_l * np.sin(yaw), x_l * np.sin(yaw) + y_l * np.cos(yaw)
-            x_rr, y_rr = x_r * np.cos(yaw) - y_r * np.sin(yaw), x_r * np.sin(yaw) + y_r * np.cos(yaw)
-            x_ll += env.state[0]
-            x_rr += env.state[0]
-            y_ll += env.state[1]
-            y_rr += env.state[1]
-            self.obstacles = list(zip(x_ll, y_ll)) + list(zip(x_rr, y_rr))
-            # print(f"OBSTACLE CHECKING: {len(self.obstacles)=}")
-            self._obstacles = self.obstacles
-
-        else:
-            self._obstacles = []
-
     # # For Timing
     # def __del__(self):
     #     if self.print_times:
@@ -162,41 +133,6 @@ class CollisionChecker:
             if (polyeval(pt[0], self._env.left_poly) - pt[1]) * (polyeval(pt[0], self._env.right_poly) - pt[1]) > 0:
                 return False
 
-        return True
-
-    # @print_time
-    def _static_collision_check(self, path: path_t):
-        """Returns a bool array on whether each path is collision free.
-        args:
-            paths: A list of paths in the global frame.
-                A path is a list of points of the following format:
-                    [x_points, y_points, t_points]:
-                        x_points: List of x values (m)
-                        y_points: List of y values (m)
-                        t_points: List of yaw values (rad)
-                    Example of accessing the ith path, jth point's t value:
-                        paths[i][2][j]
-            obstacles: A list of [x, y] points that represent points along the
-                border of obstacles, in the global frame.
-                Format: [[x0, y0],
-                         [x1, y1],
-                         ...,
-                         [xn, yn]]
-                , where n is the number of obstacle points and units are [m, m]
-        returns:
-            collision_check_array: A list of boolean values which classifies
-                whether the path is collision-free (true), or not (false). The
-                ith index in the collision_check_array list corresponds to the
-                ith path in the paths list.
-        """
-        if self._env.left_poly is None or self._env.right_poly is None:
-            assert (False, "No poly lol")
-
-        if len(path) == 0:
-            assert (False, "Empty Path")
-
-        if not self._lanes_collision_check(path):
-            return False
         return True
 
     # @print_time
@@ -282,4 +218,4 @@ class CollisionChecker:
         self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_step, self.other_vehicle_states)
 
     def check_collisions(self, path: path_t):
-        return self._static_collision_check(path) and self._dynamic_collision_check(path)
+        return self._lanes_collision_check(path) and self._dynamic_collision_check(path)

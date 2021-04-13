@@ -34,17 +34,20 @@ class CollisionChecker:
         # times.clear()
         # self.print_times = True
 
-        self._params: CollisionParams = env.collision_params
+        self._env = env
 
-        self.other_vech_current_vel = 0
-        self.other_vech_prev_vel = 0
+        self._params: CollisionParams = env.collision_params
 
         self._time_step = time_step
         self._path_length = path_length
 
-        self.other_vehicle_states = env.other_vehicle_states
+        self.other_vehicle_states = np.array(env.other_vehicle_states)
         self._other_vehicle_paths = np.zeros((len(self.other_vehicle_states), 3, path_length), dtype=float)
-        self._env = env
+
+        # TODO: Why using only 1st other_vehicle
+        if len(self.other_vehicle_states) > 0:
+            self.other_vech_current_vel = self.other_vehicle_states[0][3]
+            # self.other_vech_prev_vel = 0
 
         # for i in range(len(self._other_vehicle_paths)):
         #     vehicle_state: state_t = other_vehicle_states[i]
@@ -59,14 +62,14 @@ class CollisionChecker:
 
         #     self._other_vehicle_paths[i] = vehicle_path
 
-        self.other_vech_current_vel = None if len(self.other_vehicle_states) == 0 else self.other_vehicle_states[0][3]
-
         # Takes in a set of obstacle borders and path waypoints and returns
         # a boolean collision check array that tells if a path has an obstacle
         # or not
 
         # Find line perpendicular to the ego vehicles current heading
         # Find line with same slope but 5 meters ahead
+
+        # TODO: Only used by visualization
         self.obstacles = []
         if env.left_poly is not None and env.right_poly is not None:
 
@@ -238,6 +241,7 @@ class CollisionChecker:
 
         # time step between each point in path
         time_step = self._time_step
+        print(time_step)
 
         for j in range(len(path[0])):
 
@@ -248,27 +252,27 @@ class CollisionChecker:
             ego_circle_locations[:, 0] = path[0][j] + circle_offset * math.cos(path[2][j])
             ego_circle_locations[:, 1] = path[1][j] + circle_offset * math.sin(path[2][j])
 
-            for k in range(len(self._other_vehicle_paths)):
+            for vel, path in zip(self.other_vehicle_states[:, 3], self._other_vehicle_paths):
                 # generating other vehicles' circle locations based on circle offset
                 other_circle_locations = np.zeros((1, 2))
 
-                other_circle_locations[:, 0] = self._other_vehicle_paths[k][0][j] + circle_offset * math.cos(
-                    self._other_vehicle_paths[k][2][j])
-                other_circle_locations[:, 1] = self._other_vehicle_paths[k][1][j] + circle_offset * math.sin(
-                    self._other_vehicle_paths[k][2][j])
+                other_circle_locations[:, 0] = path[0][j] + circle_offset * math.cos(path[2][j])
+                other_circle_locations[:, 1] = path[1][j] + circle_offset * math.sin(path[2][j])
 
                 # calculating if any collisions occur
-                growth_factor = self._params.growth_factor_b + self._params.growth_factor_a * (
-                        self.other_vech_current_vel - self.other_vech_prev_vel) / self.other_vech_current_vel
+                # growth_factor = self._params.growth_factor_b + self._params.growth_factor_a * (
+                #         1 - self.other_vech_prev_vel / vel
+                # )
+                growth_factor = 0
+
                 collision_dists = scipy.spatial.distance.cdist(other_circle_locations, ego_circle_locations)
                 collision_dists = np.subtract(collision_dists,
-                                              self._params.circle_radii *
-                                              (2 + growth_factor * np.sum(time_step[:j])))
+                                              self._params.circle_radii * (2 + growth_factor * np.sum(time_step[:j])))
 
                 if np.any(collision_dists < 0):
                     return False
 
-        self.other_vech_prev_vel = self.other_vech_current_vel
+        # self.other_vech_prev_vel = self.other_vehicle_states[:, 3]
         return True
 
     # @print_time

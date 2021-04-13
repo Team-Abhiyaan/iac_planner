@@ -15,7 +15,6 @@ class Env:
 
     state: state_t = np.array([2, 2, np.pi / 6, 226])  # [x, y, theta, v]
     obstacles: np.ndarray = np.zeros((0, 2))
-    # other_vehicle_states: List[state_t] = (np.array([6, 3, 2 * np.pi / 6, 0]),)
     other_vehicle_states: List[state_t] = (np.array(
         [5, 0, 0, 0]),)
 
@@ -26,11 +25,7 @@ class Env:
     collision_params: CollisionParams = CollisionParams()
     vel_params: VelParams = VelParams()
 
-    def shift_to_ego(self, pts):
-        """
-        Args:
-            pts (n x 2):
-        """
+    def shift_to_ego(self, pts):  # pts: (n x 2)
         yaw = env.state[2]
         rot_matrix = np.array([
             [np.cos(yaw), -np.sin(yaw)],
@@ -38,11 +33,7 @@ class Env:
         )
         return ((pts - self.state[:2]).reshape((-1, 2)) @ rot_matrix).reshape(pts.shape)
 
-    def shift_to_global(self, pts):
-        """
-        Args:
-            pts (n x 2):
-        """
+    def shift_to_global(self, pts):  # pts: (n x 2)
         yaw = env.state[2]
         rot_matrix = np.array([
             [np.cos(-yaw), -np.sin(-yaw)],
@@ -82,12 +73,12 @@ if __name__ == '__main__':
         is_valid = cc.check_collisions(path)
         plt.plot(*path.T, linewidth=(2 if is_valid else 0.5), c=('green' if is_valid else 'red'), zorder=0)
 
-    for i, (state, path) in enumerate(zip(env.other_vehicle_states, cc._other_vehicle_paths)):
+    for i, (state, path) in enumerate(zip(env.other_vehicle_states,
+                                          np.swapaxes(cc._other_vehicle_paths[:, :2, :], 2, 1))):
         plt.arrow(*(env.shift_to_global(state[:2])),
                   10 * np.cos(state[2] + env.state[2]), 10 * np.sin(state[2] + env.state[2]),
                   head_width=2,
                   label=f"other {i + 1}", color='black', zorder=50)
-        plt.plot(*path[:2], linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
-        print(path)
+        plt.plot(*env.shift_to_global(path).T, linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
 
     plt.show()

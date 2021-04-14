@@ -43,10 +43,10 @@ class CollisionChecker:
         self._other_vehicle_paths = np.zeros((len(self.other_vehicle_states), 3, path_length), dtype=float)
         self._time_steps = np.zeros((path_length,))
 
-        # TODO: Why using only 1st other_vehicle
-        if len(self.other_vehicle_states) > 0:
-            self.other_vech_current_vel = self.other_vehicle_states[0][3]
-            # self.other_vech_prev_vel = 0
+        # # TODO: Why using only 1st other_vehicle
+        # if len(self.other_vehicle_states) > 0:
+        #     self.other_vech_current_vel = self.other_vehicle_states[0][3]
+        #     # self.other_vech_prev_vel = 0
 
     # # For Timing
     # def __del__(self):
@@ -82,47 +82,33 @@ class CollisionChecker:
         return True
 
     @staticmethod
-    def generate_time_step(path, velocity_profile):
-        # time_step = np.zeros((len(velocity_profile),), dtype=float)
-        time_step = np.zeros_like(velocity_profile)
+    def generate_time_steps(path, velocity_profile):
+        time_steps = np.zeros_like(velocity_profile)
 
         for i in range(len(velocity_profile) - 1):
             s = np.sqrt((path[i + 1][0] - path[i][0]) ** 2 + (path[i + 1][1] - path[i][1]) ** 2)
-            time_step[i + 1] = (2 * s) / (velocity_profile[i + 1] + velocity_profile[i])
+            time_steps[i + 1] = (2 * s) / (velocity_profile[i + 1] + velocity_profile[i])
 
-        return time_step
+        return time_steps
 
     @staticmethod
     def generate_other_vehicle_paths(time_step, other_vehicle_states):
         other_vehicle_paths = np.zeros((len(other_vehicle_states), 3, len(time_step)), dtype=float)
 
-        # for i in range(len(self._other_vehicle_paths)):
-        #     vehicle_state: state_t = other_vehicle_states[i]
-        #     vehicle_path = np.zeros((3, path_length), dtype=float)
-
-        #     time = np.arange(1, path_length + 1)  # , 1)
-        #     vehicle_path[0] = time_step * vehicle_state[3] * math.cos(vehicle_state[2]) * time + vehicle_state[0]
-        #     vehicle_path[1] = time_step * vehicle_state[3] * math.sin(vehicle_state[2]) * time + vehicle_state[1]
-        #     vehicle_path[2] = vehicle_state[2]
-
-        #     self._other_vehicle_paths[i] = vehicle_path
-
         for i in range(len(other_vehicle_paths)):
-            vehicle_state = other_vehicle_states[i]
-            vehicle_path = np.zeros((3, len(time_step)), dtype=float)
+            state = other_vehicle_states[i]
+            path = np.zeros((3, len(time_step)), dtype=float)
 
-            vehicle_path[0][0] = vehicle_state[0]
-            vehicle_path[1][0] = vehicle_state[1]
-            vehicle_path[2][0] = vehicle_state[2]
+            path[0][0] = state[0]
+            path[1][0] = state[1]
+            path[2][0] = state[2]
 
             for j in range(1, len(time_step)):
-                vehicle_path[0][j] = vehicle_path[0][j - 1] + time_step[j] * vehicle_state[3] * math.cos(
-                    vehicle_state[2])
-                vehicle_path[1][j] = vehicle_path[1][j - 1] + time_step[j] * vehicle_state[3] * math.sin(
-                    vehicle_state[2])
-                vehicle_path[2][j] = vehicle_state[2]
+                path[0][j] = path[0][j - 1] + time_step[j] * state[3] * math.cos(state[2])
+                path[1][j] = path[1][j - 1] + time_step[j] * state[3] * math.sin(state[2])
+                path[2][j] = state[2]
 
-            other_vehicle_paths[i] = vehicle_path
+            other_vehicle_paths[i] = path
 
         return other_vehicle_paths
 
@@ -133,43 +119,21 @@ class CollisionChecker:
         # if np.any(np.isnan(vel_profile)):
         #     print("Invalid Velocity profile")
         #     return False
+
         self.other_vehicle_states[:, :2] = self._env.shift_to_global(self.other_vehicle_states[:, :2])
         self.other_vehicle_states[:, 2] += self._env.state[2]
 
-        self._time_steps = self.generate_time_step(path, vel_profile)
+        self._time_steps = self.generate_time_steps(path, vel_profile)
         self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_steps, self.other_vehicle_states)
 
     # @print_time
-    def _dynamic_collision_check(self, path: path_t, vel_profile=None):
+    def _dynamic_collision_check(self, path: path_t, vel_profile=None) -> bool:
         """ Returns a bool array on whether each path is collision free.
-        args:
-                paths: A list of paths in the global frame.
-                    A path is a list of points of the following format:
-                        [x_points, y_points, t_points]:
-                            x_points: List of x values (m)
-                            y_points: List of y values (m)
-                            t_points: List of yaw values (rad)
-                        Example of accessing the ith path, jth point's t value:
-                            paths[i][2][j]
-                ego_state: ego state vector for the vehicle. (global frame)
-                    format: [ego_x, ego_y, ego_yaw, ego_speed]
-                        ego_x and ego_y     : position (m)
-                        ego_yaw             : top-down orientation [-pi to pi] (ground frame)
-                        ego_speed : speed (m/s)
-                other_vehicle_states: other vehicles' state vectors
-                    Each state vector is of the format (global frame):
-                        [pos_x, pos_y, yaw, speed]
-                            pos_x and pos_y	: position (m)
-                            yaw 			: top-down orientation [-pi to pi] (ground frame)
-                            speed 			: speed (m/s)
-                        Example of accessing the ith car's speed would be:
-                            other_vehicle_states[i][3]
-                look_ahead_time: The look ahead time to which the paths have been generated (s)
-            returns:
-                collision_check_array: A list of boolean values which classifies
-                    whether the path is collision-free (true), or not (false). The
-                    ith index in the collision_check_array list corresponds to the
-                    ith path in the paths list.
+        Args:
+                path: a path_t in global frame
+                vel_profile: a 1D np.array of length (len(path) - 1)
+        Returns:
+                bool: whether path is safe
         """
 
         if len(self._other_vehicle_paths) == 0:
@@ -219,5 +183,13 @@ class CollisionChecker:
         # self.other_vech_prev_vel = self.other_vehicle_states[:, 3]
         return True
 
-    def check_collisions(self, path: path_t, vel_profile=None):
+    def check_collisions(self, path: path_t, vel_profile=None) -> bool:
+        """
+
+        Args:
+                path: a path_t in global frame
+                vel_profile: a 1D np.array of length (len(path) - 1)
+        Returns:
+            is path safe
+        """
         return self._lanes_collision_check(path) and self._dynamic_collision_check(path, vel_profile)

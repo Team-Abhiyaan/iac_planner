@@ -18,7 +18,7 @@ class Env:
     state: state_t = np.array([2, 2, np.pi / 6, 226])  # [x, y, theta, v]
     obstacles: np.ndarray = np.zeros((0, 2))
     other_vehicle_states: List[state_t] = (np.array(
-        [5, 0, 0, 0]),)
+        [15.0, 0.0, 0.0, 0.0]),)
 
     # https://www.desmos.com/calculator/mf0yccchqn
     left_poly: RoadLinePolynom = RoadLinePolynom(8, 0.05, -0.003, -0.00001)
@@ -95,12 +95,19 @@ def main():
             plt.Rectangle(center + np.array([-c * L / 2 + s * W / 2, -s * L / 2 - c * W / 2]), width=L, height=W,
                           angle=theta * 180 / np.pi, **kwargs))
 
+    def draw_vech(xy, theta, params=env.collision_params, **kwargs):
+        ego_circle_locations = np.repeat(xy.reshape(1, -1), len(params.circle_offsets), 0)
+        ego_circle_locations[:, 0] += params.circle_offsets * np.cos(theta)
+        ego_circle_locations[:, 1] += params.circle_offsets * np.sin(theta)
+        for loc in ego_circle_locations:
+            plt.gca().add_artist(
+                plt.Circle(loc, params.circle_radii, **kwargs)
+            )
+
     # plt.arrow(env.state[0], env.state[1],
     #           10 * np.cos(env.state[2]), 10 * np.sin(env.state[2]), head_width=2, label='vehicle', zorder=100)
-    draw_rect(env.state[:2], env.state[2], color="blue")
-    plt.gca().add_artist(
-        plt.Circle(env.state[:2], env.collision_params.circle_radii, color='red')
-    )
+    # draw_rect(env.state[:2], env.state[2], color="blue")
+    draw_vech(env.state[:2], env.state[2], color="blue")
 
     # Lanes
     if len(lane_boundry_pts := env.lane_to_points()) != 0:
@@ -120,7 +127,8 @@ def main():
                   10 * np.cos(state[2] + env.state[2]), 10 * np.sin(state[2] + env.state[2]),
                   head_width=2,
                   label=f"other {i + 1}", color='black', zorder=50)
-        draw_rect(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
+        # draw_rect(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
+        draw_vech(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
 
         plt.plot(*env.shift_to_global(path).T, linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
 

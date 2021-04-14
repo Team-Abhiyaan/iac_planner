@@ -129,6 +129,9 @@ class CollisionChecker:
     def init_other_paths(self, path, vel_profile=None):
         if vel_profile is None:
             vel_profile = generate_velocity_profile(self._env, path)
+        # if np.any(np.isnan(vel_profile)):
+        #     print("Invalid Velocity profile")
+        #     return False
         self._time_steps = self.generate_time_step(path, vel_profile)
         self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_steps, self.other_vehicle_states)
 
@@ -173,21 +176,24 @@ class CollisionChecker:
 
         self.init_other_paths(path, vel_profile)
 
-        for j in range(len(path[0])):
-
+        angle = self._env.state[2]
+        for j in range(len(path)-1):
             # generating ego vehicle's circle location from the given offset
             ego_circle_locations = np.zeros((1, 2))
 
-            circle_offset = self._params.circle_offset
-            ego_circle_locations[:, 0] = path[0][j] + circle_offset * math.cos(path[2][j])
-            ego_circle_locations[:, 1] = path[1][j] + circle_offset * math.sin(path[2][j])
+            if j != 0:
+                angle = np.arctan2(*(path[j, :2] - path[j - 1, :2]))
 
-            for vel, path in zip(self.other_vehicle_states[:, 3], self._other_vehicle_paths):
+            circle_offset = self._params.circle_offset
+            ego_circle_locations[:, 0] = path[j, 0] + circle_offset * math.cos(angle)
+            ego_circle_locations[:, 1] = path[j, 1] + circle_offset * math.sin(angle)
+
+            for vel, opath in zip(self.other_vehicle_states[:, 3], self._other_vehicle_paths):
                 # generating other vehicles' circle locations based on circle offset
                 other_circle_locations = np.zeros((1, 2))
-
-                other_circle_locations[:, 0] = path[0][j] + circle_offset * math.cos(path[2][j])
-                other_circle_locations[:, 1] = path[1][j] + circle_offset * math.sin(path[2][j])
+                other_circle_locations[:, 0] = opath[0][j] + circle_offset * math.cos(opath[2][j])
+                other_circle_locations[:, 1] = opath[1][j] + circle_offset * math.sin(opath[2][j])
+                # print(other_circle_locations, ego_circle_locations)
 
                 # calculating if any collisions occur
                 # growth_factor = self._params.growth_factor_b + self._params.growth_factor_a * (
@@ -196,9 +202,9 @@ class CollisionChecker:
                 growth_factor = 0
 
                 collision_dists = scipy.spatial.distance.cdist(other_circle_locations, ego_circle_locations)
-                collision_dists = np.subtract(collision_dists,
-                                              self._params.circle_radii * (2 + growth_factor * np.sum(
-                                                  self._time_steps[:j])))
+
+                min_dist = self._params.circle_radii * (2 + growth_factor * np.sum(self._time_steps[:j]))
+                collision_dists = np.subtract(collision_dists, min_dist)
 
                 if np.any(collision_dists < 0):
                     return False

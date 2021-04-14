@@ -18,7 +18,7 @@ class Env:
     state: state_t = np.array([2, 2, np.pi / 6, 226])  # [x, y, theta, v]
     obstacles: np.ndarray = np.zeros((0, 2))
     other_vehicle_states: List[state_t] = (np.array(
-        [15.0, 0.0, 0.0, 0.0]),)
+        [15.0, 0, 0.0 + np.pi / 2, 0.0]),)
 
     # https://www.desmos.com/calculator/mf0yccchqn
     left_poly: RoadLinePolynom = RoadLinePolynom(8, 0.05, -0.003, -0.00001)

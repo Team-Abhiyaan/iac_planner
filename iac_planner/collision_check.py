@@ -49,25 +49,6 @@ class CollisionChecker:
             self.other_vech_current_vel = self.other_vehicle_states[0][3]
             # self.other_vech_prev_vel = 0
 
-        # for i in range(len(self._other_vehicle_paths)):
-        #     vehicle_state: state_t = other_vehicle_states[i]
-        #     vehicle_path = np.zeros((3, path_length), dtype=float)
-
-        #     time = np.arange(1, path_length + 1)  # , 1)
-        #     vehicle_path[0] = time_step * vehicle_state[3] * math.cos(vehicle_state[2]) * time + vehicle_state[0]
-        #     vehicle_path[1] = time_step * vehicle_state[3] * math.sin(vehicle_state[2]) * time + vehicle_state[1]
-        #     vehicle_path[2] = vehicle_state[2]
-        #     visualize(env.m_pub, env.nh.get_clock(), 75 + i, vehicle_path.T[:, :2],
-        #               color=ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0))
-
-        #     self._other_vehicle_paths[i] = vehicle_path
-
-        # Takes in a set of obstacle borders and path waypoints and returns
-        # a boolean collision check array that tells if a path has an obstacle
-        # or not
-
-        # Find line perpendicular to the ego vehicles current heading
-        # Find line with same slope but 5 meters ahead
 
     # # For Timing
     # def __del__(self):
@@ -89,6 +70,17 @@ class CollisionChecker:
     @staticmethod
     def generate_other_vehicle_paths(time_step, other_vehicle_states):
         other_vehicle_paths = np.zeros((len(other_vehicle_states), 3, len(time_step)), dtype=float)
+
+        # for i in range(len(self._other_vehicle_paths)):
+        #     vehicle_state: state_t = other_vehicle_states[i]
+        #     vehicle_path = np.zeros((3, path_length), dtype=float)
+
+        #     time = np.arange(1, path_length + 1)  # , 1)
+        #     vehicle_path[0] = time_step * vehicle_state[3] * math.cos(vehicle_state[2]) * time + vehicle_state[0]
+        #     vehicle_path[1] = time_step * vehicle_state[3] * math.sin(vehicle_state[2]) * time + vehicle_state[1]
+        #     vehicle_path[2] = vehicle_state[2]
+
+        #     self._other_vehicle_paths[i] = vehicle_path
 
         for i in range(len(other_vehicle_paths)):
             vehicle_state = other_vehicle_states[i]

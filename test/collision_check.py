@@ -118,7 +118,7 @@ if __name__ == '__main__':
                   10 * np.cos(state[2] + env.state[2]), 10 * np.sin(state[2] + env.state[2]),
                   head_width=2,
                   label=f"other {i + 1}", color='black', zorder=50)
-        # draw_rect(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
+        draw_rect(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
 
         plt.plot(*env.shift_to_global(path).T, linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
 

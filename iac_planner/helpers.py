@@ -35,8 +35,10 @@ class VelParams:
 
 @dataclass
 class CollisionParams:
-    circle_offset = 0
-    circle_radii = 0.75
+    # Overall Length 4876 mm
+    # Overall Width 1930 mm
+    circle_offsets = np.array((-1.7, 0, 1.7,))
+    circle_radii = 1.2
     growth_factor_a = 0
     growth_factor_b = 0
 

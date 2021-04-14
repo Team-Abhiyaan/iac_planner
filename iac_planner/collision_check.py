@@ -179,20 +179,20 @@ class CollisionChecker:
         angle = self._env.state[2]
         for j in range(len(path)-1):
             # generating ego vehicle's circle location from the given offset
-            ego_circle_locations = np.zeros((1, 2))
+            circle_offsets = self._params.circle_offsets
+            ego_circle_locations = np.zeros((len(circle_offsets), 2))
 
             if j != 0:
                 angle = np.arctan2(*(path[j, :2] - path[j - 1, :2]))
 
-            circle_offset = self._params.circle_offset
-            ego_circle_locations[:, 0] = path[j, 0] + circle_offset * math.cos(angle)
-            ego_circle_locations[:, 1] = path[j, 1] + circle_offset * math.sin(angle)
+            ego_circle_locations[:, 0] = path[j, 0] + circle_offsets * math.cos(angle)
+            ego_circle_locations[:, 1] = path[j, 1] + circle_offsets * math.sin(angle)
 
             for vel, opath in zip(self.other_vehicle_states[:, 3], self._other_vehicle_paths):
                 # generating other vehicles' circle locations based on circle offset
-                other_circle_locations = np.zeros((1, 2))
-                other_circle_locations[:, 0] = opath[0][j] + circle_offset * math.cos(opath[2][j])
-                other_circle_locations[:, 1] = opath[1][j] + circle_offset * math.sin(opath[2][j])
+                other_circle_locations = np.zeros_like(ego_circle_locations)
+                other_circle_locations[:, 0] = opath[0][j] + circle_offsets * math.cos(opath[2][j])
+                other_circle_locations[:, 1] = opath[1][j] + circle_offsets * math.sin(opath[2][j])
                 # print(other_circle_locations, ego_circle_locations)
 
                 # calculating if any collisions occur

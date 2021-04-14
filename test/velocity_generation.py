@@ -8,7 +8,9 @@ from iac_planner.helpers import VelParams, state_t
 
 @dataclass
 class Env:
-    state: state_t = np.array([2., 2., 0.52359878, 226.])
+    #                          x   y   theta       vel
+    state: state_t = np.array([2., 2., 0.52359878, 18.])
+    # Problem disappears when vel < 18
     vel_params: VelParams = VelParams()
 
 

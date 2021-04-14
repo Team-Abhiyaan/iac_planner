@@ -48,7 +48,7 @@ def BetterPredict(index, waypoints,N ,v,theta,env: Env, path: path_t):
     tmp1= np.square(mu*N) - np.square(m*tempVel*tempVel*math.cos((theta[index-1]+theta[index-2])/2)/R - m*9.81*math.sin((theta[index-1]+theta[index-2])/2))
     LowerLimit= np.sqrt((-np.sqrt(tmp1) - dragCoeff*tempVel*tempVel - rollingFriction)*2*d/m + v[index-2]*v[index-2])
     
-    print(waypoints[index-1][3], LowerLimit)
+    # print(waypoints[index-1][3], LowerLimit)
     if waypoints[index-1][3]< LowerLimit:
         # print("4")
         return BetterPredict(index-1, waypoints,N ,v ,theta,env,path.copy())
@@ -91,15 +91,15 @@ def stepBack(index, tempVelocity, N ,v ,theta, waypoints,env: Env, path: path_t)
     
     tmp1= np.square(mu*N) - np.square(m*tempVel*tempVel*math.cos((theta[index-1]+theta[index-2])/2)/R - m*9.81*math.sin((theta[index-1]+theta[index-2])/2))
     LowerLimit= np.sqrt((-np.sqrt(tmp1) - dragCoeff*tempVel*tempVel - rollingFriction)*2*d/m + v[index-2]*v[index-2])
-    print("0000",tmp1)
-    print(secondaryWaypoints[index-1][3], LowerLimit)
+    # print("0000",tmp1)
+    # print(secondaryWaypoints[index-1][3], LowerLimit)
     
     
     if secondaryWaypoints[index-1][3]< LowerLimit:
-        print("2")
+        # print("2")
         return BetterPredict(index-1, secondaryWaypoints,N ,v ,theta,env, path.copy())
     else:
-        print("3")
+        #  ("3")
         return secondaryWaypoints
 
 

@@ -40,6 +40,7 @@ class CollisionChecker:
 
         self.other_vehicle_states = np.array(env.other_vehicle_states)
         self._other_vehicle_paths = np.zeros((len(self.other_vehicle_states), 3, path_length), dtype=float)
+        self._time_steps = np.zeros((path_length,))
 
         # TODO: Why using only 1st other_vehicle
         if len(self.other_vehicle_states) > 0:
@@ -52,6 +53,32 @@ class CollisionChecker:
     #         global times
     #         for k, v in times.items():
     #             print(f"{k}: {v:.3f}")
+
+    def _lanes_collision_check(self, path: path_t):
+        if self._env.left_poly is None or self._env.right_poly is None:
+            print("NO POLY!!!")
+            return True
+
+        if len(path) == 0:
+            assert (False, "Empty Path")
+
+            # Transform path to local frame
+        env = self._env
+        yaw = env.state[2]
+        pos_cur = np.array([env.state[0], env.state[1]]).reshape((1, 2))
+        rot_matrix = np.array([
+            [np.cos(-yaw), np.sin(-yaw)],
+            [-np.sin(-yaw), np.cos(-yaw)]]
+        )
+        p_trans = (path - pos_cur) @ rot_matrix
+
+        # Check for outside lane
+        # TODO: Add a buffer
+        for pt in p_trans:
+            if (polyeval(pt[0], self._env.left_poly) - pt[1]) * (polyeval(pt[0], self._env.right_poly) - pt[1]) > 0:
+                return False
+
+        return True
 
     @staticmethod
     def generate_time_step(path, velocity_profile):
@@ -98,31 +125,11 @@ class CollisionChecker:
 
         return other_vehicle_paths
 
-    def _lanes_collision_check(self, path: path_t):
-        if self._env.left_poly is None or self._env.right_poly is None:
-            print("NO POLY!!!")
-            return True
-
-        if len(path) == 0:
-            assert (False, "Empty Path")
-
-            # Transform path to local frame
-        env = self._env
-        yaw = env.state[2]
-        pos_cur = np.array([env.state[0], env.state[1]]).reshape((1, 2))
-        rot_matrix = np.array([
-            [np.cos(-yaw), np.sin(-yaw)],
-            [-np.sin(-yaw), np.cos(-yaw)]]
-        )
-        p_trans = (path - pos_cur) @ rot_matrix
-
-        # Check for outside lane
-        # TODO: Add a buffer
-        for pt in p_trans:
-            if (polyeval(pt[0], self._env.left_poly) - pt[1]) * (polyeval(pt[0], self._env.right_poly) - pt[1]) > 0:
-                return False
-
-        return True
+    # @print_time
+    def init_other_paths(self, path):
+        velocity_profile = generate_velocity_profile(self._env, path)
+        self._time_steps = self.generate_time_step(path, velocity_profile)
+        self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_steps, self.other_vehicle_states)
 
     # @print_time
     def _dynamic_collision_check(self, path: path_t):
@@ -156,13 +163,14 @@ class CollisionChecker:
                     ith index in the collision_check_array list corresponds to the
                     ith path in the paths list.
         """
-        self.init_other_paths(path)
 
         if len(self._other_vehicle_paths) == 0:
             return True
 
         if len(path) == 0:
             assert (False, "Empty Path")
+
+        self.init_other_paths(path)
 
         for j in range(len(path[0])):
 
@@ -196,12 +204,6 @@ class CollisionChecker:
 
         # self.other_vech_prev_vel = self.other_vehicle_states[:, 3]
         return True
-
-    # @print_time
-    def init_other_paths(self, path):
-        velocity_profile = generate_velocity_profile(self._env, path)
-        self._time_steps = self.generate_time_step(path, velocity_profile)
-        self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_steps, self.other_vehicle_states)
 
     def check_collisions(self, path: path_t):
         return self._lanes_collision_check(path) and self._dynamic_collision_check(path)

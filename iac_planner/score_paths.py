@@ -18,7 +18,7 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
     best_trajectory = None
     best_cost = +inf
 
-    collision_checker = CollisionChecker(env, max_path_len, time_step=0.5)
+    collision_checker = CollisionChecker(env, max_path_len)
     for index, path in enumerate(paths):
         path = path[:]
         cost = 0.0

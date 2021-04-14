@@ -82,7 +82,7 @@ if __name__ == '__main__':
     plt.xlim((env.state[0] - 10, env.state[0] + 75))
     plt.ylim((env.state[1] - 30, env.state[1] + 75))
 
-    cc = CollisionChecker(env, path_length=20, time_step=0.5)
+    cc = CollisionChecker(env, path_length=20)
 
 
     # Ego

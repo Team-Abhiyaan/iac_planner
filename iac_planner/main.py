@@ -111,7 +111,7 @@ def main(args: Optional[List[str]] = None):
                     plt.ylim((env.state[1] - 75, env.state[1] + 75))
 
                     from iac_planner.collision_check import CollisionChecker
-                    cc = CollisionChecker(env, 20, time_step=0.5)
+                    cc = CollisionChecker(env, 20)
                     cc.init_other_paths(trajectory[0])
 
                     if len(lane_boundry_pts := env.lane_to_points()) != 0:

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from iac_planner.collision_check import CollisionChecker
+from iac_planner.generate_velocity_profile import generate_velocity_profile
 from iac_planner.helpers import state_t, CollisionParams, path_t, VelParams
 from iac_planner.path_sampling._core import polyeval
 from iac_planner.path_sampling.types import RoadLinePolynom
@@ -106,7 +107,11 @@ def main():
         plt.scatter(*zip(*lane_boundry_pts), label='Lane Boundaries', s=5)
 
     for path in get_paths(env.state, 10):
-        is_valid = cc.check_collisions(path)
+        vel_profile = generate_velocity_profile(env, path)
+        if np.any(np.isnan(vel_profile)):
+            print("ERROR: NAN in velocity_profile")
+            continue
+        is_valid = cc.check_collisions(path, vel_profile)
         plt.plot(*path.T, linewidth=(2 if is_valid else 0.5), c=('green' if is_valid else 'red'), zorder=0)
 
     for i, (state, path) in enumerate(zip(env.other_vehicle_states,
@@ -125,7 +130,10 @@ def main():
 def for_timing(env: Env):
     cc = CollisionChecker(env, path_length=20)
     for path in get_paths(env.state, n_paths=32, n_pts=100):
-        cc.check_collisions(path)
+        vel_profile = generate_velocity_profile(env, path)
+        if np.any(np.isnan(vel_profile)):
+            continue
+        cc.check_collisions(path, vel_profile)
         # print(cc.check_collisions(path))
 
 

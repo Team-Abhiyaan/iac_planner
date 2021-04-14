@@ -26,6 +26,9 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
 
         # ~ 300 ms total
         vel_profile = generate_velocity_profile(env, path)
+        if np.any(np.isnan(vel_profile)):
+            print("ERROR: NAN in velocity_profile")
+            continue
 
         if not collision_checker.check_collisions(path, vel_profile):
             continue

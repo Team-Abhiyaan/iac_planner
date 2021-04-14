@@ -27,7 +27,7 @@ def score_paths(env: Env, paths: Iterable[path_t], max_path_len: Optional[int] =
         # ~ 300 ms total
         vel_profile = generate_velocity_profile(env, path)
 
-        if not collision_checker.check_collisions(path):
+        if not collision_checker.check_collisions(path, vel_profile):
             continue
 
         # Assume the path is a set of line segments

@@ -126,13 +126,14 @@ class CollisionChecker:
         return other_vehicle_paths
 
     # @print_time
-    def init_other_paths(self, path):
-        velocity_profile = generate_velocity_profile(self._env, path)
-        self._time_steps = self.generate_time_step(path, velocity_profile)
+    def init_other_paths(self, path, vel_profile=None):
+        if vel_profile is None:
+            vel_profile = generate_velocity_profile(self._env, path)
+        self._time_steps = self.generate_time_step(path, vel_profile)
         self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_steps, self.other_vehicle_states)
 
     # @print_time
-    def _dynamic_collision_check(self, path: path_t):
+    def _dynamic_collision_check(self, path: path_t, vel_profile=None):
         """ Returns a bool array on whether each path is collision free.
         args:
                 paths: A list of paths in the global frame.
@@ -170,7 +171,7 @@ class CollisionChecker:
         if len(path) == 0:
             assert (False, "Empty Path")
 
-        self.init_other_paths(path)
+        self.init_other_paths(path, vel_profile)
 
         for j in range(len(path[0])):
 
@@ -205,5 +206,5 @@ class CollisionChecker:
         # self.other_vech_prev_vel = self.other_vehicle_states[:, 3]
         return True
 
-    def check_collisions(self, path: path_t):
-        return self._lanes_collision_check(path) and self._dynamic_collision_check(path)
+    def check_collisions(self, path: path_t, vel_profile=None):
+        return self._lanes_collision_check(path) and self._dynamic_collision_check(path, vel_profile)

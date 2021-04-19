@@ -1,5 +1,0 @@
-.idea/**
-**/__pycache__/**
-venv
-.vscode
-/resources/RtiSCADE_DS_Controller_ego*.xml

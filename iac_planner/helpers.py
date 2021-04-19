@@ -77,8 +77,6 @@ class Env:
 
     global_path_handler: GlobalPathHandler = GlobalPathHandler()
 
-    plot_paths: bool = True
-
     def shift_to_ego(self, pts):  # pts: (n x 2)
         yaw = self.state[2]
         rot_matrix = np.array([

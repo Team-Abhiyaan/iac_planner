@@ -41,9 +41,6 @@ def main(args: Optional[List[str]] = None):
         EGO = int(args[1])
     print(f"Using ego {EGO}")
 
-    if args is not None and len(args) >= 3 and args[2].strip() == '--no-plot':
-        env.plot_paths = False
-
     info("Starting up...")
 
     env.global_path_handler.load_from_csv(GLOBAL_PATH_CSV_FILE)
@@ -97,42 +94,11 @@ def main(args: Optional[List[str]] = None):
                 # ~ 30 ms
                 throttle, steer = controller.run_controller_timestep(env, trajectory)
                 if use_global:  # Emergency braking
+                    print("Warning: Emergency Braking")
                     throttle = 0.1
 
                 t_logic = time.time()
                 print(f"time: {(t_logic - t_start):.3f}")
-
-                if env.plot_paths:  # ~ 200ms
-                    import matplotlib.pyplot as plt
-                    plt.clf()
-                    plt.title(f"EGO {EGO}")
-                    plt.gca().set_aspect('equal', adjustable='box')
-                    plt.xlim((env.state[0] - 75, env.state[0] + 75))
-                    plt.ylim((env.state[1] - 75, env.state[1] + 75))
-
-                    from iac_planner.collision_check import CollisionChecker
-                    cc = CollisionChecker(env, 20)
-                    cc.init_other_paths(trajectory[0])
-
-                    if len(lane_boundry_pts := env.lane_to_points()) != 0:
-                        plt.scatter(*zip(*lane_boundry_pts), label='obstacles', s=5)
-                    plt.scatter(*env.path[:40].T, label='global path', s=5)
-
-                    if trajectory is not None:
-                        plt.scatter(*trajectory[0].T, label=('local path' if not use_global else 'fake local'), s=5)
-                    plt.arrow(env.state[0], env.state[1], 20 * np.cos(env.state[2]), 20 * np.sin(env.state[2]),
-                              head_width=5, label='vehicle')
-                    for i, state in enumerate(env.other_vehicle_states):
-                        plt.arrow(state[0], state[1],
-                                  20 * np.cos(state[2]), 20 * np.sin(state[2]),
-                                  head_width=5,
-                                  label=f"other {i + 1}", color='red')
-
-                    for i, path in enumerate(cc._other_vehicle_paths):
-                        plt.scatter(*path[:2], s=5, label=f"path {i + 1}", color='red')
-
-                    plt.legend()
-                    plt.pause(0.005)
 
                 vehicle_steer.instance.setNumber("AdditiveSteeringWheelAngle", steer)
                 vehicle_correct.instance.setNumber("AcceleratorAdditive", throttle)

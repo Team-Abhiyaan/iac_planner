@@ -18,7 +18,7 @@ class Env:
     state: state_t = np.array([2, 2, np.pi / 6, 226])  # [x, y, theta, v]
     obstacles: np.ndarray = np.zeros((0, 2))
     other_vehicle_states: List[state_t] = (np.array(
-        [15.0, 0, 0.0 + np.pi / 2, 0.0]),)
+        [15.0, 0, 0.0 + np.pi / 2, 20.0]),)
 
     # https://www.desmos.com/calculator/mf0yccchqn
     left_poly: RoadLinePolynom = RoadLinePolynom(8, 0.05, -0.003, -0.00001)
@@ -68,11 +68,15 @@ class Env:
 
 def get_paths(state: state_t, n_paths: int = 12, n_pts: int = 32, alpha_max: float = 0.01) \
         -> Generator[path_t, None, None]:
-    x0, y0, theta = state[:3]
-    x = np.linspace(x0, x0 + 50, n_pts)
+    x = np.linspace(state[0], state[0] + 50, n_pts)
     for alpha in np.linspace(-alpha_max, alpha_max, n_paths):
-        y = y0 + (x - x0) * np.tan(theta) + (x - x0) ** 2 * alpha
-        yield np.vstack([x, y]).T
+        yield get_quadratic(state, alpha, x)
+
+
+def get_quadratic(state, alpha, x_vals):
+    x0, y0, theta = state[:3]
+    y = y0 + (x_vals - x0) * np.tan(theta) + (x_vals - x0) ** 2 * alpha
+    return np.vstack([x_vals, y]).T
 
 
 def main():
@@ -83,7 +87,16 @@ def main():
     plt.xlim((env.state[0] - 10, env.state[0] + 75))
     plt.ylim((env.state[1] - 30, env.state[1] + 75))
 
-    cc = CollisionChecker(env, path_length=20)
+    path_length = 100
+    n_paths = 16
+    cc = CollisionChecker(env, path_length=path_length)
+    for path in get_paths(env.state, n_paths=n_paths, n_pts=path_length):
+        vel_profile = generate_velocity_profile(env, path)
+        if np.any(np.isnan(vel_profile)):
+            print("ERROR: NAN in velocity_profile")
+            continue
+        is_valid = cc.check_collisions(path, vel_profile)
+        plt.plot(*path.T, linewidth=(2 if is_valid else 0.5), c=('green' if is_valid else 'red'), zorder=0)
 
     # Ego
     # Overall Length 192 inches/4876 mm
@@ -104,33 +117,27 @@ def main():
                 plt.Circle(loc, params.circle_radii, **kwargs)
             )
 
+    # Ego Vehicle
     # plt.arrow(env.state[0], env.state[1],
     #           10 * np.cos(env.state[2]), 10 * np.sin(env.state[2]), head_width=2, label='vehicle', zorder=100)
     # draw_rect(env.state[:2], env.state[2], color="blue")
     draw_vech(env.state[:2], env.state[2], color="blue")
 
-    # Lanes
+    # Lane Boundary
     if len(lane_boundry_pts := env.lane_to_points()) != 0:
         plt.scatter(*zip(*lane_boundry_pts), label='Lane Boundaries', s=5)
 
-    for path in get_paths(env.state, 10):
-        vel_profile = generate_velocity_profile(env, path)
-        if np.any(np.isnan(vel_profile)):
-            print("ERROR: NAN in velocity_profile")
-            continue
-        is_valid = cc.check_collisions(path, vel_profile)
-        plt.plot(*path.T, linewidth=(2 if is_valid else 0.5), c=('green' if is_valid else 'red'), zorder=0)
-
-    for i, (state, path) in enumerate(zip(env.other_vehicle_states,
+    # Other Vehicles
+    for i, (state, path) in enumerate(zip(cc.other_vehicle_states,
                                           np.swapaxes(cc._other_vehicle_paths[:, :2, :], 2, 1))):
-        plt.arrow(*(env.shift_to_global(state[:2])),
-                  10 * np.cos(state[2] + env.state[2]), 10 * np.sin(state[2] + env.state[2]),
+        plt.arrow(*(state[:2]),
+                  10 * np.cos(state[2]), 10 * np.sin(state[2]),
                   head_width=2,
                   label=f"other {i + 1}", color='black', zorder=50)
         # draw_rect(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
-        draw_vech(env.shift_to_global(state[:2]), state[2] + env.state[2], color="black")
+        draw_vech(state[:2], state[2], color="black")
 
-        plt.plot(*env.shift_to_global(path).T, linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
+        plt.plot(*path.T, linewidth=8, label=f"path {i + 1}", color='orange', zorder=20)
 
     plt.show()
 

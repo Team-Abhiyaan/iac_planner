@@ -38,10 +38,12 @@ class CollisionChecker:
         self._params: CollisionParams = env.collision_params
         self._path_length = path_length
 
-        self.other_vehicle_states = np.zeros((len(env.other_vehicle_states), 3))
+        self.other_vehicle_states = np.zeros((len(env.other_vehicle_states), 4))
         if len(env.other_vehicle_states) != 0:
-            self.other_vehicle_states[:, :2] = env.shift_to_global(np.stack(env.other_vehicle_states, axis=0)[:, :2])
-            self.other_vehicle_states[:, 2] += env.state[2]
+            stacked = np.stack(env.other_vehicle_states, axis=0)
+            self.other_vehicle_states[:, :2] = env.shift_to_global(stacked[:, :2])
+            self.other_vehicle_states[:, 2] = stacked[:, 2] + env.state[2]
+            self.other_vehicle_states[:, 3] = stacked[:, 3]
 
         self._other_vehicle_paths = np.zeros((len(self.other_vehicle_states), 3, path_length), dtype=float)
         self._time_steps = np.zeros((path_length,))

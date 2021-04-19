@@ -38,7 +38,10 @@ class CollisionChecker:
         self._params: CollisionParams = env.collision_params
         self._path_length = path_length
 
-        self.other_vehicle_states = np.stack(env.other_vehicle_states, axis=0)
+        self.other_vehicle_states = np.zeros((len(env.other_vehicle_states), 3))
+        if len(env.other_vehicle_states) != 0:
+            self.other_vehicle_states[:, :2] = env.shift_to_global(np.stack(env.other_vehicle_states, axis=0)[:, :2])
+            self.other_vehicle_states[:, 2] += env.state[2]
 
         self._other_vehicle_paths = np.zeros((len(self.other_vehicle_states), 3, path_length), dtype=float)
         self._time_steps = np.zeros((path_length,))
@@ -119,9 +122,6 @@ class CollisionChecker:
         # if np.any(np.isnan(vel_profile)):
         #     print("Invalid Velocity profile")
         #     return False
-
-        self.other_vehicle_states[:, :2] = self._env.shift_to_global(self.other_vehicle_states[:, :2])
-        self.other_vehicle_states[:, 2] += self._env.state[2]
 
         self._time_steps = self.generate_time_steps(path, vel_profile)
         self._other_vehicle_paths = self.generate_other_vehicle_paths(self._time_steps, self.other_vehicle_states)
